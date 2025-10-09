@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
 
 class SecondaryButton extends StatelessWidget {
   final String text;
@@ -17,36 +16,30 @@ class SecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return SizedBox(
       height: 46,
       child: OutlinedButton(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primaryGreen,
-          backgroundColor: AppColors.backgroundIvory,
-          side: const BorderSide(color: AppColors.primaryGreen, width: 1.6),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          textStyle: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
-          ),
+          foregroundColor: cs.primary,
+          backgroundColor: cs.surface,
+          side: BorderSide(color: cs.primary, width: 1.6),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
         ),
         onPressed: loading ? null : onPressed,
         child: loading
-            ? const SizedBox(
+            ? SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.4,
-                  color: AppColors.primaryGreen,
-                ),
+                child: CircularProgressIndicator(strokeWidth: 2.4, color: cs.primary),
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (icon != null) ...[
-                    Icon(icon, size: 18, color: AppColors.primaryGreen),
+                    Icon(icon, size: 18),
                     const SizedBox(width: 6),
                   ],
                   Text(text),

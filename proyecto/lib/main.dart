@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:proyecto/features/auth/login/login_screen.dart';
 import 'package:proyecto/routes/app_routes.dart';
-import 'theme/app_theme.dart';
+import 'package:proyecto/theme/app_theme.dart';
+import 'package:proyecto/shared/state/theme_controller.dart';
+import 'package:proyecto/features/auth/login/login_screen.dart';
+
+// 👇 Instancia GLOBAL única
+final ThemeController themeController = ThemeController();
 
 void main() {
   runApp(const MyApp());
@@ -12,11 +16,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MALUIAN Pets App',
-      theme: AppTheme.lightTheme,
-      home: const LoginScreen(),
-      routes: AppRoutes.routes,
+    return AnimatedBuilder(
+      animation: themeController,
+      builder: (context, _) {
+        return MaterialApp(
+          title: 'MALUIAN Pets App',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeController.themeMode,
+          home: const LoginScreen(),
+          routes: AppRoutes.routes,
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }

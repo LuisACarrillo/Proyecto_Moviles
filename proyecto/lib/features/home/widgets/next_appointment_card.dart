@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto/shared/widgets/custom_card.dart';
-import 'package:proyecto/theme/app_colors.dart';
 
 class NextAppointmentCard extends StatelessWidget {
   const NextAppointmentCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return CustomCard(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.event, color: AppColors.primaryGreen, size: 36),
+          Icon(Icons.event, color: cs.primary, size: 36),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -18,24 +21,22 @@ class NextAppointmentCard extends StatelessWidget {
               children: [
                 Text(
                   "Tu próxima cita:",
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: tt.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: cs.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   "Viernes 5 de septiembre",
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.primaryGreen,
+                  style: tt.bodySmall?.copyWith(
+                    color: cs.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   "Calle 236, Col. Producción",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: AppColors.neutralGray),
+                  style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ],
             ),

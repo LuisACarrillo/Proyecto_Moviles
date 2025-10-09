@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
 
 class AppTextField extends StatelessWidget {
   final TextEditingController? controller;
@@ -30,7 +29,7 @@ class AppTextField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixIcon: icon != null ? Icon(icon, color: AppColors.primaryGreen) : null,
+        prefixIcon: icon != null ? Icon(icon) : null,
       ),
       validator: validator,
     );

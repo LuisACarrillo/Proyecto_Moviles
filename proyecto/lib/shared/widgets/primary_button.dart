@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
@@ -17,12 +16,14 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return SizedBox(
       height: 48,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryGreen,
-          foregroundColor: AppColors.backgroundIvory,
+          backgroundColor: cs.primary,
+          foregroundColor: cs.onPrimary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -31,18 +32,13 @@ class PrimaryButton extends StatelessWidget {
         onPressed: loading ? null : onPressed,
         child: loading
             ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: AppColors.backgroundIvory,
-                ),
+                width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5),
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (icon != null) ...[
-                    Icon(icon, size: 20, color: AppColors.backgroundIvory),
+                    Icon(icon, size: 20),
                     const SizedBox(width: 8),
                   ],
                   Text(text),
