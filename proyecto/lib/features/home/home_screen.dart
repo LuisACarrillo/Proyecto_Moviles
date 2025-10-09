@@ -23,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: AppBar(
-        // Usa el color definido en el tema para que cambie en dark/light
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         title: Text(
@@ -44,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Icons.wb_sunny_outlined,
                     color: AppColors.accentGold,
                   ),
+                  // TODO: Move switch to corresponding screen
                   Switch.adaptive(
                     value: themeController.isDark,
                     onChanged: themeController.setDark,
