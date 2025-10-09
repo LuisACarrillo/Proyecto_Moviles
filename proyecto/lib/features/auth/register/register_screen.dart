@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:proyecto/features/auth/login/widgets/login_form.dart';
+import 'package:proyecto/features/auth/register/widgets/register_form.dart';
 import 'package:proyecto/features/auth/login/widgets/logo_header.dart';
 import 'package:proyecto/theme/app_colors.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatelessWidget {
+  const RegisterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,25 +24,25 @@ class LoginScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   const LogoHeader(),
                   const SizedBox(height: 24),
-                  const LoginForm(),
+                  const RegisterForm(),
                   const SizedBox(height: 16),
 
-                  // Register
+                  // Back to Login
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        '¿No tienes una cuenta? ',
+                        '¿Ya tienes cuenta? ',
                         style: textTheme.bodyMedium?.copyWith(
                           color: Colors.black87,
                         ),
                       ),
                       GestureDetector(
                         onTap: () {
-                          Navigator.pushNamed(context, '/register');
+                          Navigator.pop(context);
                         },
                         child: Text(
-                          'Regístrate',
+                          'Inicia sesión',
                           style: textTheme.bodyMedium?.copyWith(
                             color: AppColors.accentGold,
                             fontWeight: FontWeight.w700,

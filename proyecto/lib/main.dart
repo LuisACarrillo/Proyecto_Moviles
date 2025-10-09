@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto/features/auth/login/login_screen.dart';
+import 'package:proyecto/routes/app_routes.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget {
       title: 'MALUIAN Pets App',
       theme: AppTheme.lightTheme,
       home: const LoginScreen(),
+      routes: AppRoutes.routes,
     );
   }
 }
