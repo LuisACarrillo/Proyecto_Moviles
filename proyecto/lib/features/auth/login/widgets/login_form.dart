@@ -28,6 +28,7 @@ class _LoginFormState extends State<LoginForm> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Campos validados")));
+      Navigator.pushNamed(context, '/home');
     }
   }
 
