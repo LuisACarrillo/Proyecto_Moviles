@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:proyecto/features/home/doctor_profile.dart';
 import 'package:proyecto/shared/widgets/custom_card.dart';
 
 class DoctorCarousel extends StatefulWidget {
@@ -60,6 +61,12 @@ class _DoctorCarouselState extends State<DoctorCarousel> {
                   ),
                 ],
               ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DoctorProfile())
+                );
+              },
             );
           },
           options: CarouselOptions(
@@ -94,7 +101,7 @@ class _DoctorCarouselState extends State<DoctorCarousel> {
                       ? cs.primary
                       : cs.outline.withValues(
                           alpha: 0.4,
-                        ), 
+                        ),
                 ),
               ),
             );

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto/shared/widgets/app_bottom.dart';
 import 'package:proyecto/theme/app_colors.dart';
-import 'package:proyecto/main.dart' show themeController;
 
 class DoctorProfile extends StatelessWidget {
   const DoctorProfile({super.key});
@@ -46,7 +45,7 @@ class DoctorProfile extends StatelessWidget {
                       ),
                     ),
                     child: ClipOval(
-                      child: Image.network(
+                      child: Image.network( //change image when necessary
                         "https://thumbs.dreamstime.com/b/businessman-avatar-line-icon-vector-illustration-design-79327237.jpg",
                         fit: BoxFit.cover,
                       ),

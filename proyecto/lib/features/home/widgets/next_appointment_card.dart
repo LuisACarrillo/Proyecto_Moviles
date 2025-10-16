@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto/features/home/next_appointment_screen.dart';
 import 'package:proyecto/shared/widgets/custom_card.dart';
 
 class NextAppointmentCard extends StatelessWidget {
@@ -43,6 +44,12 @@ class NextAppointmentCard extends StatelessWidget {
           ),
         ],
       ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const NextAppointmentScreen())
+        );
+      },
     );
   }
 }
