@@ -1,85 +1,85 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart' as cs;
+import 'package:proyecto/theme/app_colors.dart';
 
 class UserScreen extends StatelessWidget {
+  const UserScreen({super.key});
   // final cs.CarouselController _controller = cs.CarouselController();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Ejemplo con Icono Circular'),
-      ),
-      body: SingleChildScrollView(
+    final textTheme = Theme.of(context).textTheme;
+    final csTheme = Theme.of(context).colorScheme;
+
+    // No Scaffold here — HomeScreen provides the scaffold and appBar
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.blue,
-                  child: Icon(Icons.person, color: Colors.white, size: 30),
+                  radius: 36,
+                  backgroundColor: AppColors.primaryGreen,
+                  child: Icon(Icons.person, color: Colors.white, size: 36),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Nombre', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text('Raza', style: TextStyle(fontSize: 14)),
-                    Text('Edad', style: TextStyle(fontSize: 14)),
-                    Text('Peso', style: TextStyle(fontSize: 14)),
+                    Text('Nombre', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: csTheme.onSurface)),
+                    Text('Raza', style: textTheme.bodyMedium?.copyWith(color: csTheme.onSurface)),
+                    Text('Edad', style: textTheme.bodyMedium?.copyWith(color: csTheme.onSurface)),
+                    Text('Peso', style: textTheme.bodyMedium?.copyWith(color: csTheme.onSurface)),
                   ],
                 ),
               ],
             ),
 
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Citas previas',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Citas previas',
+                style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: csTheme.onSurface),
               ),
             ),
 
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
 
             Row(
               children: [
                 Expanded(
                   child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 16),
-                    padding: EdgeInsets.all(16),
+                    margin: const EdgeInsets.symmetric(horizontal: 0),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: Theme.of(context).colorScheme.surfaceVariant,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey),
+                      border: Border.all(color: Theme.of(context).dividerColor),
                     ),
                     child: Text(
                       'Aquí va la información de las citas...',
-                      style: TextStyle(fontSize: 14),
+                      style: textTheme.bodyMedium?.copyWith(color: csTheme.onSurface),
                     ),
                   ),
                 ),
               ],
             ),
 
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
 
             cs.CarouselSlider(
-              // carouselController: _controller,
               options: cs.CarouselOptions(
                 height: 150,
                 enlargeCenterPage: true,
                 autoPlay: true,
                 aspectRatio: 16 / 9,
-                autoPlayInterval: Duration(seconds: 3),
+                autoPlayInterval: const Duration(seconds: 3),
               ),
               items: [
                 'Cita 1',
@@ -90,15 +90,15 @@ class UserScreen extends StatelessWidget {
                   builder: (BuildContext context) {
                     return Container(
                       width: MediaQuery.of(context).size.width * 0.8,
-                      margin: EdgeInsets.symmetric(horizontal: 8.0),
+                      margin: const EdgeInsets.symmetric(horizontal: 8.0),
                       decoration: BoxDecoration(
-                        color: Colors.blueAccent,
+                        color: AppColors.primaryGreen,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(
                         child: Text(
                           item,
-                          style: TextStyle(fontSize: 16.0, color: Colors.white),
+                          style: textTheme.titleMedium?.copyWith(color: Colors.white),
                         ),
                       ),
                     );

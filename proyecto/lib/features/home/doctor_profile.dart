@@ -12,18 +12,6 @@ class DoctorProfile extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        elevation: 0,
-        title: Text(
-          "Perfil",
-          style: textTheme.titleLarge?.copyWith(
-            color: AppColors.primaryGreen,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -155,12 +143,6 @@ class DoctorProfile extends StatelessWidget {
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: AppBottomBar(
-        currentIndex: 1,
-        onTap: (index) {
-          // TODO: Handle navigation
-        },
       ),
     );
   }
