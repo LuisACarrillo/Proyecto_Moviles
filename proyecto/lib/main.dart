@@ -4,7 +4,6 @@ import 'package:proyecto/theme/app_theme.dart';
 import 'package:proyecto/shared/state/theme_controller.dart';
 import 'package:proyecto/features/auth/login/login_screen.dart';
 
-// 👇 Instancia GLOBAL única
 final ThemeController themeController = ThemeController();
 
 void main() {

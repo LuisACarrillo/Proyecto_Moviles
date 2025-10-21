@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto/features/home/widgets/food_carousel.dart';
 import 'package:proyecto/features/home/widgets/next_appointment_card.dart';
 import 'package:proyecto/features/home/widgets/doctor_carousel.dart';
+import 'package:proyecto/features/home/widgets/veterinaries_carousel.dart';
 import 'package:proyecto/theme/app_colors.dart';
 import 'package:proyecto/main.dart' show themeController;
 
@@ -36,14 +38,14 @@ class _HomePageState extends State<HomePage> {
             const DoctorCarousel(),
             const SizedBox(height: 24),
             Text(
-              "Echa un vistazo a las siguientes estéticas",
+              "Echa un vistazo a las siguientes veterinarias",
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: cs.onSurface,
               ),
             ),
             const SizedBox(height: 12),
-            const DoctorCarousel(),
+            const VetCarousel(),
             const SizedBox(height: 24),
             Text(
               "Los alimentos más populares del momento",
@@ -53,7 +55,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 12),
-            const DoctorCarousel(),
+            const FoodCarousel(),
             const SizedBox(height: 24),
           ],
         ),
