@@ -18,31 +18,40 @@ class PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return SizedBox(
-      height: 48,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 48),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: cs.primary,
           foregroundColor: cs.onPrimary,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          minimumSize: const Size(0, 48),
         ),
         onPressed: loading ? null : onPressed,
         child: loading
             ? const SizedBox(
-                width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5),
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(strokeWidth: 2.5),
               )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 20),
-                    const SizedBox(width: 8),
-                  ],
-                  Text(text),
-                ],
+            : Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (icon != null) ...[
+                        Icon(icon, size: 20),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(text, maxLines: 1, overflow: TextOverflow.visible),
+                    ],
+                  ),
+                ),
               ),
       ),
     );
