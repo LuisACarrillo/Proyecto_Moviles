@@ -58,15 +58,15 @@ class _LoginFormState extends State<LoginForm> {
               hint: "ingresa@tu.correo",
               icon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return "Por favor ingresa tu correo";
-                }
-                if (!value.contains('@')) {
-                  return "Correo no válido";
-                }
-                return null;
-              },
+              // validator: (value) {
+              //   if (value == null || value.trim().isEmpty) {
+              //     return "Por favor ingresa tu correo";
+              //   }
+              //   if (!value.contains('@')) {
+              //     return "Correo no válido";
+              //   }
+              //   return null;
+              // },
             ),
             const SizedBox(height: 12),
 
@@ -77,15 +77,15 @@ class _LoginFormState extends State<LoginForm> {
               hint: "••••••••",
               icon: Icons.lock_outline_rounded,
               obscure: true,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "Por favor ingresa tu contraseña";
-                }
-                if (value.length < 6) {
-                  return "Mínimo 6 caracteres";
-                }
-                return null;
-              },
+              // validator: (value) {
+              //   if (value == null || value.isEmpty) {
+              //     return "Por favor ingresa tu contraseña";
+              //   }
+              //   if (value.length < 6) {
+              //     return "Mínimo 6 caracteres";
+              //   }
+              //   return null;
+              // },
             ),
             const SizedBox(height: 8),
 

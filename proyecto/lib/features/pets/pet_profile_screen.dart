@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto/features/appointments/appointment_form_screen.dart';
+import 'package:proyecto/features/pets/pet_edit_screen.dart';
+import 'package:proyecto/routes/app_routes.dart';
 import 'package:proyecto/shared/widgets/custom_card.dart';
 import 'package:proyecto/shared/widgets/primary_button.dart';
 import 'package:proyecto/shared/widgets/secondary_button.dart';
@@ -28,15 +31,13 @@ class PetProfileScreen extends StatelessWidget {
     final nextVaccine = args?.nextVaccine ?? "-";
 
     return Scaffold(
-      // ✅ Fondo consistente con el resto (surface)
       backgroundColor: cs.surface,
       appBar: AppBar(
-        // ✅ Que el AppBar use lo definido en el tema
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         title: Text(
           name,
           style: tt.titleLarge?.copyWith(
-            color: cs.primary, // mantenemos título en verde como en Home
+            color: cs.primary,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -48,7 +49,6 @@ class PetProfileScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              // Header
               CustomCard(
                 child: Row(
                   children: [
@@ -81,14 +81,25 @@ class PetProfileScreen extends StatelessWidget {
                     ),
                     SecondaryButton(
                       text: "Editar",
-                      onPressed: () {}, // TODO: acción de editar
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.petEdit,
+                          arguments: PetEditArgs(
+                            name: name,
+                            ageYears: age,
+                            nextVaccine: nextVaccine,
+                            species: 'Perro',
+                            breed: 'Mestizo',
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
 
-              // Salud / recordatorios
               CustomCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,7 +142,6 @@ class PetProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Historial
               CustomCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,12 +169,20 @@ class PetProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // CTA agendar
               SizedBox(
                 width: double.infinity,
                 child: PrimaryButton(
                   text: "Agendar cita",
-                  onPressed: () {}, // TODO: navegación a agendado
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.appointmentForm,
+                      arguments: AppointmentArgs(
+                        petName: name,
+                        defaultReason: 'Consulta general',
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
