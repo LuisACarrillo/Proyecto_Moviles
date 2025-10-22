@@ -30,7 +30,13 @@ class _StoreDemoScreenState extends State<StoreDemoScreen> {
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: AppBar(
-        title: Text('Catálogo', style: tt.titleLarge?.copyWith(color: cs.primary, fontWeight: FontWeight.w700)),
+        title: Text(
+          'Catálogo',
+          style: tt.titleLarge?.copyWith(
+            color: cs.primary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         centerTitle: true,
         elevation: 0,
       ),
@@ -48,11 +54,21 @@ class _StoreDemoScreenState extends State<StoreDemoScreen> {
                       prefixIcon: Icons.category_outlined,
                       items: const [
                         DropdownMenuItem(value: 'Todos', child: Text('Todos')),
-                        DropdownMenuItem(value: 'Alimentos', child: Text('Alimentos')),
-                        DropdownMenuItem(value: 'Higiene', child: Text('Higiene')),
-                        DropdownMenuItem(value: 'Accesorios', child: Text('Accesorios')),
+                        DropdownMenuItem(
+                          value: 'Alimentos',
+                          child: Text('Alimentos'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Higiene',
+                          child: Text('Higiene'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Accesorios',
+                          child: Text('Accesorios'),
+                        ),
                       ],
-                      onChanged: (v) => setState(() => _category = v ?? 'Todos'),
+                      onChanged: (v) =>
+                          setState(() => _category = v ?? 'Todos'),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -62,11 +78,21 @@ class _StoreDemoScreenState extends State<StoreDemoScreen> {
                       label: 'Ordenar por',
                       prefixIcon: Icons.sort,
                       items: const [
-                        DropdownMenuItem(value: 'Relevancia', child: Text('Relevancia')),
-                        DropdownMenuItem(value: 'Precio: menor a mayor', child: Text('Precio: menor a mayor')),
-                        DropdownMenuItem(value: 'Precio: mayor a menor', child: Text('Precio: mayor a menor')),
+                        DropdownMenuItem(
+                          value: 'Relevancia',
+                          child: Text('Relevancia'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Precio: menor a mayor',
+                          child: Text('Precio: menor a mayor'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Precio: mayor a menor',
+                          child: Text('Precio: mayor a menor'),
+                        ),
                       ],
-                      onChanged: (v) => setState(() => _sort = v ?? 'Relevancia'),
+                      onChanged: (v) =>
+                          setState(() => _sort = v ?? 'Relevancia'),
                     ),
                   ),
                 ],
@@ -83,13 +109,10 @@ class _StoreDemoScreenState extends State<StoreDemoScreen> {
                 crossAxisSpacing: 12,
                 childAspectRatio: .78,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final (name, price, icon) = _products[index];
-                  return _ProductCard(name: name, price: price, icon: icon);
-                },
-                childCount: _products.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final (name, price, icon) = _products[index];
+                return _ProductCard(name: name, price: price, icon: icon);
+              }, childCount: _products.length),
             ),
           ),
         ],
@@ -127,7 +150,10 @@ class _ThemedDropdown<T> extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 14,
+        ),
       ),
       items: items,
       onChanged: onChanged,
@@ -138,7 +164,11 @@ class _ThemedDropdown<T> extends StatelessWidget {
 }
 
 class _ProductCard extends StatelessWidget {
-  const _ProductCard({required this.name, required this.price, required this.icon});
+  const _ProductCard({
+    required this.name,
+    required this.price,
+    required this.icon,
+  });
 
   final String name;
   final String price;
@@ -174,11 +204,23 @@ class _ProductCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(price, style: tt.bodySmall?.copyWith(color: cs.primary, fontWeight: FontWeight.w700)),
+          Text(
+            price,
+            style: tt.bodySmall?.copyWith(
+              color: cs.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           const SizedBox(height: 8),
           PrimaryButton(
             text: 'Agregar',
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Aquí se agregará el producto al carrito'),
+                ),
+              );
+            },
           ),
         ],
       ),
