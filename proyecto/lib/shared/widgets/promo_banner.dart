@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:proyecto/shared/widgets/custom_card.dart';
 import 'package:proyecto/shared/widgets/primary_button.dart';
 
-class PromoBanner extends StatelessWidget {
+class PromoBanner extends StatefulWidget {
   const PromoBanner({super.key});
 
+  @override
+  State<PromoBanner> createState() => _PromoBannerState();
+}
+
+class _PromoBannerState extends State<PromoBanner> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -37,7 +42,9 @@ class PromoBanner extends StatelessWidget {
             child: PrimaryButton(
               text: "Aprovechar",
               onPressed: () {
-                const SnackBar(content: Text('Aqui se verá la oferta'));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Aqui mandará a la oferta')),
+                );
               },
             ),
           ),
