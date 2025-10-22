@@ -14,7 +14,8 @@ class PromoBanner extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 56, height: 56,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
               color: cs.primary.withValues(alpha: .12),
               borderRadius: BorderRadius.circular(12),
@@ -35,7 +36,9 @@ class PromoBanner extends StatelessWidget {
             width: 130,
             child: PrimaryButton(
               text: "Aprovechar",
-              onPressed: () {},
+              onPressed: () {
+                const SnackBar(content: Text('Aqui se verá la oferta'));
+              },
             ),
           ),
         ],
