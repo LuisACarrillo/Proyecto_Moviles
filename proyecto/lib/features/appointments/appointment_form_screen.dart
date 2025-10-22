@@ -155,6 +155,7 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
                       value: 'Vacunación',
                       child: Text('Vacunación'),
                     ),
+                    DropdownMenuItem(value: 'Paseo', child: Text('Paseo')),
                     DropdownMenuItem(
                       value: 'Desparasitación',
                       child: Text('Desparasitación'),
