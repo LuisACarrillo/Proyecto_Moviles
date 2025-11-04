@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "418019899255",
+    "project_id": "maluian-pets",
+    "storage_bucket": "maluian-pets.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:418019899255:android:0cdec821f1387fa1e19372",
+        "android_client_info": {
+          "package_name": "com.example.proyecto"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJQMQ6VHPOiP1bsDfURnY-OKua1t_u6H8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

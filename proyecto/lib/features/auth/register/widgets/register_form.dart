@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:proyecto/shared/widgets/app_text_field.dart';
 import 'package:proyecto/shared/widgets/custom_card.dart';
 import 'package:proyecto/shared/widgets/primary_button.dart';
@@ -17,6 +18,7 @@ class _RegisterFormState extends State<RegisterForm> {
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   final _confirmPassCtrl = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -27,11 +29,41 @@ class _RegisterFormState extends State<RegisterForm> {
     super.dispose();
   }
 
-  void _onSubmit() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Registro validado")));
+  Future<void> _onSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailCtrl.text.trim(),
+        password: _passCtrl.text.trim(),
+      );
+
+      await FirebaseAuth.instance.currentUser!
+          .updateDisplayName(_nameCtrl.text.trim());
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Registro exitoso")),
+        );
+        Navigator.pushNamed(context, '/home');
+      }
+    } on FirebaseAuthException catch (e) {
+      String message = "Error al registrar";
+      if (e.code == 'email-already-in-use') {
+        message = "Este correo ya está registrado";
+      } else if (e.code == 'invalid-email') {
+        message = "Correo inválido";
+      } else if (e.code == 'weak-password') {
+        message = "Contraseña demasiado débil";
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -54,7 +86,6 @@ class _RegisterFormState extends State<RegisterForm> {
             ),
             const SizedBox(height: 16),
 
-            // Name
             AppTextField(
               controller: _nameCtrl,
               label: "Nombre completo",
@@ -69,7 +100,6 @@ class _RegisterFormState extends State<RegisterForm> {
             ),
             const SizedBox(height: 12),
 
-            // Email
             AppTextField(
               controller: _emailCtrl,
               label: "Correo",
@@ -88,7 +118,6 @@ class _RegisterFormState extends State<RegisterForm> {
             ),
             const SizedBox(height: 12),
 
-            // Password
             AppTextField(
               controller: _passCtrl,
               label: "Contraseña",
@@ -107,7 +136,6 @@ class _RegisterFormState extends State<RegisterForm> {
             ),
             const SizedBox(height: 12),
 
-            // Confirm Password
             AppTextField(
               controller: _confirmPassCtrl,
               label: "Confirmar Contraseña",
@@ -123,7 +151,10 @@ class _RegisterFormState extends State<RegisterForm> {
             ),
             const SizedBox(height: 16),
 
-            PrimaryButton(text: "Registrarse", onPressed: _onSubmit),
+            PrimaryButton(
+              text: _isLoading ? "Cargando..." : "Registrarse",
+              onPressed: _isLoading ? null : _onSubmit,
+            ),
           ],
         ),
       ),
