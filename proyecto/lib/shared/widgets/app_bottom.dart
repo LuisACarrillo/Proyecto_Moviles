@@ -32,7 +32,7 @@ class AppBottomBar extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: "Home"),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
-          label: "Perfil",
+          label: "Perfil"
         ),
       ],
     );

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto/features/appointments/appointment_form_screen.dart';
+import 'package:proyecto/routes/app_routes.dart';
 import 'package:proyecto/shared/widgets/app_bottom.dart';
 import 'package:proyecto/theme/app_colors.dart';
 
@@ -27,13 +29,11 @@ class DoctorProfile extends StatelessWidget {
                     height: 100,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.accentGold,
-                        width: 3,
-                      ),
+                      border: Border.all(color: AppColors.accentGold, width: 3),
                     ),
                     child: ClipOval(
-                      child: Image.network( //change image when necessary
+                      child: Image.network(
+                        //change image when necessary
                         "https://thumbs.dreamstime.com/b/businessman-avatar-line-icon-vector-illustration-design-79327237.jpg",
                         fit: BoxFit.cover,
                       ),
@@ -92,9 +92,7 @@ class DoctorProfile extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                style: textTheme.bodyMedium?.copyWith(
-                  color: cs.onSurface,
-                ),
+                style: textTheme.bodyMedium?.copyWith(color: cs.onSurface),
               ),
               const SizedBox(height: 24),
               // Trayectoria
@@ -111,9 +109,7 @@ class DoctorProfile extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.",
-                style: textTheme.bodyMedium?.copyWith(
-                  color: cs.onSurface,
-                ),
+                style: textTheme.bodyMedium?.copyWith(color: cs.onSurface),
               ),
               const SizedBox(height: 32),
               // Agendar cita button
@@ -129,7 +125,14 @@ class DoctorProfile extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    // TODO: Implement scheduling logic
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.appointmentForm,
+                      arguments: AppointmentArgs(
+                        petName: 'mascota',
+                        defaultReason: 'Consulta general',
+                      ),
+                    );
                   },
                   child: Text(
                     "Agendar cita",
