@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto/features/store/services/payment_link_service.dart';
+import 'package:proyecto/routes/app_routes.dart';
 import 'package:proyecto/shared/widgets/custom_card.dart';
 import 'package:proyecto/shared/widgets/primary_button.dart';
 import 'package:proyecto/features/store/state/cart_controller.dart';
@@ -15,7 +17,13 @@ class CartScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Carrito', style: tt.titleLarge?.copyWith(color: cs.primary, fontWeight: FontWeight.w700)),
+        title: Text(
+          'Carrito',
+          style: tt.titleLarge?.copyWith(
+            color: cs.primary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         centerTitle: true,
         elevation: 0,
       ),
@@ -23,8 +31,10 @@ class CartScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: cart.items.isEmpty
             ? Center(
-                child: Text('Tu carrito está vacío 🐾',
-                    style: tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant)),
+                child: Text(
+                  'Tu carrito está vacío 🐾',
+                  style: tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
+                ),
               )
             : Column(
                 children: [
@@ -37,23 +47,37 @@ class CartScreen extends StatelessWidget {
                           margin: const EdgeInsets.only(bottom: 12),
                           child: Row(
                             children: [
-                              Icon(Icons.shopping_bag_outlined, color: cs.primary, size: 28),
+                              Icon(
+                                Icons.shopping_bag_outlined,
+                                color: cs.primary,
+                                size: 28,
+                              ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(product.name,
-                                        style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-                                    Text('MXN ${product.price.toStringAsFixed(2)}',
-                                        style: tt.bodySmall?.copyWith(color: cs.primary)),
+                                    Text(
+                                      product.name,
+                                      style: tt.bodyMedium?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text(
+                                      'MXN ${product.price.toStringAsFixed(2)}',
+                                      style: tt.bodySmall?.copyWith(
+                                        color: cs.primary,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
                               Row(
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.remove_circle_outline),
+                                    icon: const Icon(
+                                      Icons.remove_circle_outline,
+                                    ),
                                     onPressed: () => cart.remove(product),
                                   ),
                                   Text('$qty'),
@@ -70,18 +94,18 @@ class CartScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text('Total: MXN ${cart.totalPrice.toStringAsFixed(2)}',
-                      style: tt.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: cs.primary,
-                      )),
+                  Text(
+                    'Total: MXN ${cart.totalPrice.toStringAsFixed(2)}',
+                    style: tt.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: cs.primary,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   PrimaryButton(
-                    text: 'Proceder al pago',
+                    text: "Proceder al pago",
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Checkout no implementado aún')),
-                      );
+                      Navigator.pushNamed(context, AppRoutes.stripeCheckout);
                     },
                   ),
                 ],

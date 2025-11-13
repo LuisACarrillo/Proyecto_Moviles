@@ -12,6 +12,7 @@ import 'package:proyecto/features/pets/pet_profile_screen.dart';
 import 'package:proyecto/features/store/cart_screen.dart';
 import 'package:proyecto/features/store/store_demo_screen.dart';
 import 'package:proyecto/features/store/store_screen.dart';
+import 'package:proyecto/features/store/stripe_checkout_screen.dart';
 import 'package:proyecto/features/users/users_screen.dart';
 import 'package:proyecto/features/vets/vets_screen.dart';
 import 'package:proyecto/features/walks/walk_screen.dart';
@@ -32,6 +33,7 @@ class AppRoutes {
   static const String store = '/store';
   static const String storeDemo = '/store-demo';
   static const String cart = '/cart';
+  static const String stripeCheckout = '/stripe-checkout';
 
   static Map<String, WidgetBuilder> routes = {
     login: (context) => const LoginScreen(),
@@ -49,5 +51,6 @@ class AppRoutes {
     store: (context) => const StoreScreen(),
     storeDemo: (context) => const StoreDemoScreen(),
     cart: (context) => const CartScreen(),
+    stripeCheckout: (context) => const StripeCheckoutScreen(),
   };
 }
