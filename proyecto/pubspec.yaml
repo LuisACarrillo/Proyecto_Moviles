@@ -15,6 +15,7 @@ dependencies:
   firebase_ui_auth: ^3.0.1
   google_sign_in: ^6.3.0
   firebase_ui_oauth_google: ^2.0.1
+  provider: ^6.1.5+1
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
