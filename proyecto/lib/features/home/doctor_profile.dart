@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto/features/appointments/appointment_form_screen.dart';
+import 'package:proyecto/features/reviews/doctor_review.dart';
 import 'package:proyecto/routes/app_routes.dart';
-import 'package:proyecto/shared/widgets/app_bottom.dart';
 import 'package:proyecto/theme/app_colors.dart';
 
 class DoctorProfile extends StatelessWidget {
@@ -136,6 +136,39 @@ class DoctorProfile extends StatelessWidget {
                   },
                   child: Text(
                     "Agendar cita",
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              // Escribir reseña button. TODO: Habilitar solo cuando el doctor forme parte del historial del usuario
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryGreen,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.doctorReview,
+                      arguments: DoctorReviewArgs(
+                        vetName: 'Nombre Doctor',
+                        vetImageUrl: 'https://thumbs.dreamstime.com/b/businessman-avatar-line-icon-vector-illustration-design-79327237.jpg',
+                        appointmentId: 'última-cita-123',
+                      ),
+                    );
+                  },
+                  child: Text(
+                    "Escribir reseña",
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,

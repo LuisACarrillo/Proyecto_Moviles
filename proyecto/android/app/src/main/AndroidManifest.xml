@@ -10,6 +10,11 @@
         android:label="MALUIAN"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <!-- TODO: Add your Google Maps API key here -->
+        <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="AIzaSyA9a5pZBb9Y7pEXHCVMdbehMpG-AsQnA8Y"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
