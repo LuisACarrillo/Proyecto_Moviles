@@ -181,7 +181,7 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
                   iconSize: 20,
                   decoration: const InputDecoration(
                     labelText: 'Paseador',
-                    prefixIcon: Icon(Icons.medical_services_outlined),
+                    prefixIcon: Icon(Icons.person_outline),
                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
                   items: const [
