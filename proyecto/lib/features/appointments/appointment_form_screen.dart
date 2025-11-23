@@ -24,6 +24,8 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
   final _dateCtrl = TextEditingController();
   final _timeCtrl = TextEditingController();
   String _service = 'Consulta general';
+  String _walker_ = '';
+
 
   bool _loadedArgs = false;
 
@@ -170,6 +172,45 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
                 ),
 
                 const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: _walker_.isEmpty ? null : _walker_,
+                  isExpanded: true,
+                  isDense: true,
+                  hint: const Text("Selecciona un paseador"), //placeholder si no hay seleccionado opcional
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                  iconSize: 20,
+                  decoration: const InputDecoration(
+                    labelText: 'Paseador',
+                    prefixIcon: Icon(Icons.person_outline),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'Cristiano Ronaldo',
+                      child: Text('Cristiano Ronaldo'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Iker Casillas',
+                      child: Text('Iker Casillas'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Luis Miguel',
+                      child: Text('Luis Miguel'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'No seleccionar',
+                      child: Text('No seleccionar'),
+                    ),
+                  ],
+                  onChanged: (v) => setState(() => _walker_ = v ?? ''),
+                  dropdownColor: Theme.of(context).colorScheme.surface,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                
+                const SizedBox(height: 12),
+
 
                 GestureDetector(
                   onTap: _pickDate,
