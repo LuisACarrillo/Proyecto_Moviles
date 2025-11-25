@@ -4,6 +4,9 @@ import 'package:proyecto/shared/widgets/app_text_field.dart';
 import 'package:proyecto/shared/widgets/primary_button.dart';
 import 'package:proyecto/shared/widgets/secondary_button.dart';
 
+import 'package:proyecto/firestore_service.dart';
+
+
 class AppointmentArgs {
   final String petName;
   final String? defaultReason;
@@ -26,7 +29,7 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
   String _service = 'Consulta general';
   String _walker_ = '';
 
-
+  final FirestoreService fs = FirestoreService();
   bool _loadedArgs = false;
 
   @override
@@ -262,17 +265,26 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: PrimaryButton(
-                        text: 'Confirmar cita',
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Cita agendada')),
-                            );
-                            Navigator.pop(context);
-                          }
-                        },
-                      ),
+                      // child: PrimaryButton(
+                      //   text: 'Confirmar cita',
+                      //   onPressed: () {
+                      //     if (_formKey.currentState!.validate()) {
+                      //       ScaffoldMessenger.of(context).showSnackBar(
+                      //         const SnackBar(content: Text('Cita agendada')),
+                      //       );
+                      //       Navigator.pop(context);
+                      //     }
+                      //   },
+                      // ),
+                          child: PrimaryButton(
+                            text: 'Confirmar cita',
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                _crearCita(); // aquí llamamos a la función global que guarda en Firestore
+                              }
+                            },
+                          )
+                        ,
                     ),
                   ],
                 ),
@@ -283,4 +295,30 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
       ),
     );
   }
+
+    Future<void> _crearCita() async {
+    final citaData = {
+      'petName': _petCtrl.text.trim(),
+      'service': _service,
+      'walker': _walker_.isEmpty ? null : _walker_,
+      'date': _dateCtrl.text.trim(),
+      'time': _timeCtrl.text.trim(),
+      'reason': _reasonCtrl.text.trim(),
+    };
+
+    try {
+      // ID fijo que me diste
+      await fs.updateDocument('citas', 'uv2UofzEieUvLfNl1A8Q', citaData);
+      // Si quieres que se cree si no existe, puedes usar addDocument en vez de updateDocument
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cita creada con éxito')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al crear la cita: $e')),
+      );
+    }
+  }
+
 }
