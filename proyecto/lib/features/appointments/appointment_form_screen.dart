@@ -3,6 +3,8 @@ import 'package:proyecto/shared/widgets/custom_card.dart';
 import 'package:proyecto/shared/widgets/app_text_field.dart';
 import 'package:proyecto/shared/widgets/primary_button.dart';
 import 'package:proyecto/shared/widgets/secondary_button.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 import 'package:proyecto/firestore_service.dart';
 
@@ -27,8 +29,25 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
   final _dateCtrl = TextEditingController();
   final _timeCtrl = TextEditingController();
   String _service = 'Consulta general';
-  String _walker_ = '';
+  String? _walker_ ;
+  String _doctor = '';
+  
 
+  List<String> doctors = [
+    'Dr. House',
+    'Dra. Meredith Grey',
+    'Dr. Strange',
+    'No seleccionar', // opcional
+  ];
+  List<String> walkers = [
+  'Cristiano Ronaldo',
+  'Iker Casillas',
+  'Luis Miguel',
+  'No seleccionar',
+  ];
+  bool _loadingWalkers = true;
+
+  bool _loadingDoctors = true;
   final FirestoreService fs = FirestoreService();
   bool _loadedArgs = false;
 
@@ -43,6 +62,8 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
       _reasonCtrl.text = args.defaultReason ?? 'Consulta general';
     }
     _loadedArgs = true;
+    _loadDoctors(); 
+    _loadWalkers();
   }
 
   @override
@@ -52,7 +73,10 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
     _dateCtrl.dispose();
     _timeCtrl.dispose();
     super.dispose();
+  
   }
+
+
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
@@ -175,43 +199,64 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
                 ),
 
                 const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: _walker_.isEmpty ? null : _walker_,
+                 DropdownButtonFormField<String>(
+                  value: _doctor.isEmpty ? null : _doctor,
                   isExpanded: true,
                   isDense: true,
-                  hint: const Text("Selecciona un paseador"), //placeholder si no hay seleccionado opcional
+                  hint: const Text("Selecciona un doctor"),
                   icon: const Icon(Icons.keyboard_arrow_down_rounded),
                   iconSize: 20,
                   decoration: const InputDecoration(
-                    labelText: 'Paseador',
-                    prefixIcon: Icon(Icons.person_outline),
+                    labelText: 'Doctor',
+                    prefixIcon: Icon(Icons.local_hospital_outlined),
                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'Cristiano Ronaldo',
-                      child: Text('Cristiano Ronaldo'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Iker Casillas',
-                      child: Text('Iker Casillas'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Luis Miguel',
-                      child: Text('Luis Miguel'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'No seleccionar',
-                      child: Text('No seleccionar'),
-                    ),
-                  ],
-                  onChanged: (v) => setState(() => _walker_ = v ?? ''),
+                  items: _loadingDoctors
+                  ? [const DropdownMenuItem(value: 'cargando', child: Text('Cargando...'))]
+                  : doctors.map((doc) => DropdownMenuItem(
+                      value: doc,
+                      child: Text(doc),
+                    )).toList(),
+
+                  onChanged: (v) => setState(() => _doctor = v ?? ''),
                   dropdownColor: Theme.of(context).colorScheme.surface,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                
+
+
+                const SizedBox(height: 12),
+
+DropdownButtonFormField<String>(
+  value: _walker_,
+  isExpanded: true,
+  isDense: true,
+  hint: const Text("Selecciona un paseador"),
+  icon: const Icon(Icons.keyboard_arrow_down_rounded),
+  iconSize: 20,
+  decoration: const InputDecoration(
+    labelText: 'Paseador',
+    prefixIcon: Icon(Icons.person_outline),
+    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+  ),
+  items: _loadingWalkers
+      ? [const DropdownMenuItem(value: null, child: Text('Cargando...'))]
+      : walkers.map((walker) => DropdownMenuItem(
+            value: walker,
+            child: Text(walker),
+          )).toList(),
+  onChanged: (v) => setState(() => _walker_ = v),
+  dropdownColor: Theme.of(context).colorScheme.surface,
+  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
+),
+
+
+
+
+                                
                 const SizedBox(height: 12),
 
 
@@ -297,28 +342,113 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
   }
 
     Future<void> _crearCita() async {
-    final citaData = {
-      'petName': _petCtrl.text.trim(),
-      'service': _service,
-      'walker': _walker_.isEmpty ? null : _walker_,
-      'date': _dateCtrl.text.trim(),
-      'time': _timeCtrl.text.trim(),
-      'reason': _reasonCtrl.text.trim(),
-    };
+      try {
+        final docRef = FirebaseFirestore.instance.collection('citas').doc(); // ID automático
+        final idGenerado = docRef.id;
 
-    try {
-      // ID fijo que me diste
-      await fs.updateDocument('citas', 'uv2UofzEieUvLfNl1A8Q', citaData);
-      // Si quieres que se cree si no existe, puedes usar addDocument en vez de updateDocument
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cita creada con éxito')),
-      );
-      Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al crear la cita: $e')),
-      );
+        final citaData = {
+          'id': idGenerado,
+          'petName': _petCtrl.text.trim(),
+          'service': _service,
+          'walker': _walker_,
+          'doctor': _doctor.isEmpty ? null : _doctor,
+          'date': _dateCtrl.text.trim(),
+          'time': _timeCtrl.text.trim(),
+          'reason': _reasonCtrl.text.trim(),
+        };
+
+        await docRef.set(citaData);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Cita creada con éxito. ID: $idGenerado')),
+        );
+        Navigator.pop(context);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al crear la cita: $e')),
+        );
+      }
     }
+
+
+Future<void> _loadDoctors() async {
+  setState(() => _loadingDoctors = true); // marcamos cargando
+  try {
+    final snapshot = await FirebaseFirestore.instance.collection('doctores').get();
+
+   // print('Docs recibidos de Firestore: ${snapshot.docs.length}');
+   // for (var doc in snapshot.docs) {
+     // print('Doctor: ${doc.data()}');
+   // }
+
+    if (snapshot.docs.isNotEmpty) {
+      final fetchedDoctors = snapshot.docs
+          .map((doc) => doc['Nombre'] as String)
+          .toList();
+      setState(() {
+        doctors = fetchedDoctors;
+        _loadingDoctors = false;
+      });
+    } else {
+      // colección vacía, usamos hardcode
+      setState(() {
+        doctors = [
+          'Dr. House',
+          'Dra. Meredith Grey',
+          'Dr. Strange',
+          'No seleccionar',
+        ];
+        _loadingDoctors = false;
+      });
+    }
+  } catch (e) {
+    // error leyendo la bd, usamos hardcode
+    setState(() {
+      doctors = [
+        'Dr. House',
+        'Dra. Meredith Grey',
+        'Dr. Strange',
+        'No seleccionar',
+      ];
+      _loadingDoctors = false;
+    });
+    print('Error cargando doctores: $e');
   }
+}
+
+Future<void> _loadWalkers() async {
+  setState(() => _loadingWalkers = true);
+  try {
+    final snapshot = await FirebaseFirestore.instance.collection('paseador').get();
+
+    if (snapshot.docs.isNotEmpty) {
+      final fetchedWalkers = snapshot.docs.map((doc) => doc['Nombre'] as String).toList();
+      setState(() {
+        walkers = fetchedWalkers;
+        _loadingWalkers = false;
+        _walker_ = null;
+      });
+    } else {
+      // fallback hardcodeado
+      setState(() {
+        walkers = ['Cristiano Ronaldo', 'Iker Casillas', 'Luis Miguel', 'No seleccionar'];
+        _loadingWalkers = false;
+        _walker_ = null;
+      });
+    }
+  } catch (e) {
+    // error leyendo Firestore, fallback hardcodeado
+    setState(() {
+      walkers = ['Cristiano Ronaldo', 'Iker Casillas', 'Luis Miguel', 'No seleccionar'];
+      _loadingWalkers = false;
+      _walker_ = null;
+    });
+    print('Error cargando paseadores: $e');
+  }
+}
+
+
+
+
 
 }
