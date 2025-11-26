@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -28,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -63,6 +54,38 @@ class DefaultFirebaseOptions {
     messagingSenderId: '418019899255',
     projectId: 'maluian-pets',
     storageBucket: 'maluian-pets.firebasestorage.app',
+    iosClientId: '418019899255-52upnt2am1bsf2dcoucaa4vq4opfj8g7.apps.googleusercontent.com',
     iosBundleId: 'com.example.proyecto',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyC_j_VYj563OJyGD2ZTO9iF7xlaJau7WBo',
+    appId: '1:418019899255:web:4f62fa587bbc380de19372',
+    messagingSenderId: '418019899255',
+    projectId: 'maluian-pets',
+    authDomain: 'maluian-pets.firebaseapp.com',
+    storageBucket: 'maluian-pets.firebasestorage.app',
+    measurementId: 'G-73GS6SENP9',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyC3aFR2ciGvUprDLAu5ErTmKGK1990gWIs',
+    appId: '1:418019899255:ios:3fb1ca27ad7c0038e19372',
+    messagingSenderId: '418019899255',
+    projectId: 'maluian-pets',
+    storageBucket: 'maluian-pets.firebasestorage.app',
+    iosClientId: '418019899255-52upnt2am1bsf2dcoucaa4vq4opfj8g7.apps.googleusercontent.com',
+    iosBundleId: 'com.example.proyecto',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyC_j_VYj563OJyGD2ZTO9iF7xlaJau7WBo',
+    appId: '1:418019899255:web:3dadd339698768c1e19372',
+    messagingSenderId: '418019899255',
+    projectId: 'maluian-pets',
+    authDomain: 'maluian-pets.firebaseapp.com',
+    storageBucket: 'maluian-pets.firebasestorage.app',
+    measurementId: 'G-SJW08D4VSE',
+  );
+
 }
