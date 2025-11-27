@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:proyecto/shared/widgets/app_text_field.dart';
@@ -18,6 +19,7 @@ class _RegisterFormState extends State<RegisterForm> {
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   final _confirmPassCtrl = TextEditingController();
+  final _phoneNumber = TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -26,6 +28,7 @@ class _RegisterFormState extends State<RegisterForm> {
     _emailCtrl.dispose();
     _passCtrl.dispose();
     _confirmPassCtrl.dispose();
+    _phoneNumber.dispose();
     super.dispose();
   }
 
@@ -35,10 +38,20 @@ class _RegisterFormState extends State<RegisterForm> {
     setState(() => _isLoading = true);
 
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailCtrl.text.trim(),
         password: _passCtrl.text.trim(),
       );
+
+      final user = userCredential.user;
+      final uid = user!.uid;
+
+      await FirebaseFirestore.instance.collection("usuarios").doc(uid).set({
+        'nombre': _nameCtrl.text.trim(),
+        'email': _emailCtrl.text.trim(),
+        'creado': FieldValue.serverTimestamp(),
+        'phone': _phoneNumber.text.trim(),
+      });
 
       await FirebaseAuth.instance.currentUser!
           .updateDisplayName(_nameCtrl.text.trim());
@@ -149,7 +162,25 @@ class _RegisterFormState extends State<RegisterForm> {
                 return null;
               },
             ),
+            const SizedBox(height: 12),
+
+            AppTextField(
+              controller: _phoneNumber,
+              label: "Teléfono",
+              hint: "3312345678",
+              icon: Icons.phone,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Por favor ingresa tu teléfono";
+                }
+                if (value.length < 10) {
+                  return "Debe contener 10 números";
+                }
+                return null;
+              },
+            ),
             const SizedBox(height: 16),
+
 
             PrimaryButton(
               text: _isLoading ? "Cargando..." : "Registrarse",

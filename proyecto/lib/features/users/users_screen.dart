@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart' as cs;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:proyecto/features/pets/pet_create_screen.dart';
 import 'package:proyecto/theme/app_colors.dart';
+import 'package:proyecto/routes/app_routes.dart';
 
 class UserScreen extends StatelessWidget {
   const UserScreen({super.key});
@@ -81,12 +83,38 @@ class UserScreen extends StatelessWidget {
 
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  "Información de la mascota",
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: csTheme.onSurface,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Información de la mascota",
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: csTheme.onSurface,
+                      ),
+                    ),
+
+                    const SizedBox(width: 8,),
+
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.add, color: Colors.white),
+                      label: const Text("Agregar mascota"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryGreen,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.petCreate, // Assuming you have this route
+                          arguments: PetCreateArgs(userPath: userPath),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 8),
@@ -111,6 +139,28 @@ class UserScreen extends StatelessWidget {
                       child: const Text("No tienes mascotas registradas")
                     );
                   }
+
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.add, color: Colors.white),
+                      label: const Text("Agregar mascota"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryGreen,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () async {
+                        await FirebaseAuth.instance.signOut();
+                        await FirebaseUIAuth.signOut(context: context);
+                        if (context.mounted) {
+                        Navigator.pushNamedAndRemoveUntil(context, "/login", (_) => false);
+                        }
+                      },
+                    ),
+                  );
 
                   final mascotaData = snapshot.data!.docs.first.data() as Map<String, dynamic>;
 

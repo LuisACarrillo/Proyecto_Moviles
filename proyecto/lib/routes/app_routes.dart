@@ -8,6 +8,7 @@ import 'package:proyecto/features/home/food_profile.dart';
 import 'package:proyecto/features/home/home_screen.dart';
 import 'package:proyecto/features/home/next_appointment_screen.dart';
 import 'package:proyecto/features/pets/pet_edit_screen.dart';
+import 'package:proyecto/features/pets/pet_create_screen.dart';
 import 'package:proyecto/features/pets/pet_profile_screen.dart';
 import 'package:proyecto/features/store/cart_screen.dart';
 import 'package:proyecto/features/store/store_demo_screen.dart';
@@ -18,6 +19,7 @@ import 'package:proyecto/features/vets/vets_screen.dart';
 import 'package:proyecto/features/walks/walk_screen.dart';
 import 'package:proyecto/features/reviews/doctor_review.dart';
 
+
 class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
@@ -27,6 +29,7 @@ class AppRoutes {
   static const String userProfile = '/users_screen';
   static const String petProfile = '/pet-profile';
   static const String petEdit = '/pet-edit';
+  static const String petCreate = '/pet-create';
   static const String appointmentForm = '/appointment-form';
   static const String grooming = '/grooming';
   static const String vets = '/vets';
@@ -46,6 +49,7 @@ class AppRoutes {
     userProfile: (context) => const UserScreen(),
     petProfile: (context) => const PetProfileScreen(),
     petEdit: (context) => const PetEditScreen(),
+    petCreate: (context) => const PetCreateScreen(),
     appointmentForm: (context) => const AppointmentFormScreen(),
     grooming: (context) => const GroomingScreen(),
     vets: (context) => const VetsScreen(),
