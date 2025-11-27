@@ -7,6 +7,7 @@ import 'package:proyecto/features/home/doctor_profile.dart';
 import 'package:proyecto/features/home/food_profile.dart';
 import 'package:proyecto/features/home/home_screen.dart';
 import 'package:proyecto/features/home/next_appointment_screen.dart';
+import 'package:proyecto/features/home/vet_profile.dart';
 import 'package:proyecto/features/pets/pet_edit_screen.dart';
 import 'package:proyecto/features/pets/pet_create_screen.dart';
 import 'package:proyecto/features/pets/pet_profile_screen.dart';
@@ -39,6 +40,7 @@ class AppRoutes {
   static const String cart = '/cart';
   static const String stripeCheckout = '/stripe-checkout';
   static const String doctorReview = '/doctor_review';
+  static const String vetProfile = '/vet-profile';
 
   static Map<String, WidgetBuilder> routes = {
     login: (context) => const LoginScreen(),
@@ -59,5 +61,6 @@ class AppRoutes {
     cart: (context) => const CartScreen(),
     stripeCheckout: (context) => const StripeCheckoutScreen(),
     doctorReview: (context) => const DoctorReviewScreen(),
+    vetProfile: (context) => const VetProfile(),
   };
 }

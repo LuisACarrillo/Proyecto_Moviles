@@ -7,13 +7,22 @@ import 'package:proyecto/shared/widgets/primary_button.dart';
 import 'package:proyecto/shared/widgets/secondary_button.dart';
 
 class PetProfileArgs {
+  final String petDocId;
+  final String userPath;
   final String name;
   final int ageYears;
   final String nextVaccine;
+  final String? breed;
+  final String? species;
+
   const PetProfileArgs({
+    required this.petDocId,
+    required this.userPath,
     required this.name,
     required this.ageYears,
     required this.nextVaccine,
+    this.breed,
+    this.species,
   });
 }
 
@@ -26,9 +35,13 @@ class PetProfileScreen extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     final args = ModalRoute.of(context)?.settings.arguments as PetProfileArgs?;
+    final petDocId = args?.petDocId ?? '';
+    final userPath = args?.userPath ?? '';
     final name = args?.name ?? "Tu mascota";
     final age = args?.ageYears ?? 0;
     final nextVaccine = args?.nextVaccine ?? "-";
+    final breed = args?.breed ?? 'Mestizo';
+    final species = args?.species ?? 'Perro';
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -86,11 +99,8 @@ class PetProfileScreen extends StatelessWidget {
                           context,
                           AppRoutes.petEdit,
                           arguments: PetEditArgs(
-                            name: name,
-                            ageYears: age,
-                            nextVaccine: nextVaccine,
-                            species: 'Perro',
-                            breed: 'Mestizo',
+                            petDocId: petDocId,
+                            userPath: userPath,
                           ),
                         );
                       },

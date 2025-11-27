@@ -37,14 +37,12 @@ class _HomePageState extends State<HomePage> {
             children: [
               const HomeSearch(),
               const SizedBox(height: 16),
-              const PetSummaryCard(),
-              const SizedBox(height: 16),
               const NextAppointmentCard(),
 
               const SizedBox(height: 24),
               const SectionHeader(title: "Agenda tu próxima cita"),
               const SizedBox(height: 12),
-              const DoctorCarousel(),
+              const VetCarousel(),
 
               const SizedBox(height: 24),
               const SectionHeader(title: "Promos para ti"),

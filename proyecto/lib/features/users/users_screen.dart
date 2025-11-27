@@ -1,11 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart' as cs;
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import 'package:proyecto/features/pets/pet_create_screen.dart';
-import 'package:proyecto/theme/app_colors.dart';
-import 'package:proyecto/routes/app_routes.dart';
+import "package:cloud_firestore/cloud_firestore.dart";
+import "package:flutter/material.dart";
+import "package:carousel_slider/carousel_slider.dart" as cs;
+import "package:firebase_auth/firebase_auth.dart";
+import "package:firebase_ui_auth/firebase_ui_auth.dart";
+import "package:proyecto/features/pets/pet_create_screen.dart";
+import "package:proyecto/shared/widgets/pets_summary_card.dart";
+import "package:proyecto/theme/app_colors.dart";
+import "package:proyecto/routes/app_routes.dart";
 
 class UserScreen extends StatelessWidget {
   const UserScreen({super.key});
@@ -20,17 +21,17 @@ class UserScreen extends StatelessWidget {
 
     return Scaffold(
       // appBar: AppBar(
-      //   title: const Text('Perfil'),
+      //   title: const Text("Perfil"),
       //   actions: [
       //     IconButton(
       //       icon: const Icon(Icons.logout),
-      //       tooltip: 'Cerrar sesión',
+      //       tooltip: "Cerrar sesión",
       //       onPressed: () async {
       //         await FirebaseAuth.instance.signOut();
       //         // También cierra sesión de proveedores (Google, etc.)
       //         await FirebaseUIAuth.signOut(context: context);
       //         if (context.mounted) {
-      //           Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+      //           Navigator.pushNamedAndRemoveUntil(context, "/login", (_) => false);
       //         }
       //       },
       //     )
@@ -109,7 +110,7 @@ class UserScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.pushNamed(
                           context,
-                          AppRoutes.petCreate, // Assuming you have this route
+                          AppRoutes.petCreate,
                           arguments: PetCreateArgs(userPath: userPath),
                         );
                       },
@@ -133,58 +134,37 @@ class UserScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       width: double.infinity,
                       decoration: BoxDecoration(
-                         color: Theme.of(context).colorScheme.surfaceVariant,
-                         borderRadius: BorderRadius.circular(8),
+                        color: Theme.of(context).colorScheme.surfaceVariant,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text("No tienes mascotas registradas")
+                      child: const Text("No tienes mascotas registradas."),
                     );
                   }
 
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.add, color: Colors.white),
-                      label: const Text("Agregar mascota"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryGreen,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: () async {
-                        await FirebaseAuth.instance.signOut();
-                        await FirebaseUIAuth.signOut(context: context);
-                        if (context.mounted) {
-                        Navigator.pushNamedAndRemoveUntil(context, "/login", (_) => false);
-                        }
-                      },
-                    ),
-                  );
+                  final petCards = snapshot.data!.docs.map((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final Timestamp? vaccineTimestamp = data["proxima_vacuna"];
+                    final String nextVaccineDate = vaccineTimestamp != null
+                        ? "${vaccineTimestamp.toDate().day}/${vaccineTimestamp.toDate().month}/${vaccineTimestamp.toDate().year}"
+                        : "No registrada";
 
-                  final mascotaData = snapshot.data!.docs.first.data() as Map<String, dynamic>;
-
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceVariant,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Theme.of(context).dividerColor),
-                          ),
-                          child: Text(
-                            "Raza: ${mascotaData["raza"] ?? "N/A"}\n"
-                            "Edad: ${mascotaData["edad"] ?? "N/A"} años\n"
-                            "Especie: ${mascotaData["especie"] ?? "N/A"}",
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: csTheme.onSurface,
-                            ),
-                          ),
-                        ),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: PetSummaryCard(
+                        petDocId: doc.id,
+                        userPath: userPath,
+                        name: data["nombre"] ?? "Sin nombre",
+                        ageYears: data["edad"] ?? 0,
+                        breed: data["raza"] ?? "No especificada",
+                        species: data["especie"] ?? "No especificada",
+                        nextVaccine: nextVaccineDate,
+                        imageUrl: data["foto_url"],
                       ),
-                    ],
+                    );
+                  }).toList();
+
+                  return Column(
+                    children: petCards,
                   );
                 },
               ),
@@ -358,7 +338,6 @@ class UserScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              //  Botón de cerrar sesión
               Align(
                 alignment: Alignment.center,
                 child: ElevatedButton.icon(
