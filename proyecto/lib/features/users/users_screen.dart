@@ -3,7 +3,9 @@ import "package:flutter/material.dart";
 import "package:carousel_slider/carousel_slider.dart" as cs;
 import "package:firebase_auth/firebase_auth.dart";
 import "package:firebase_ui_auth/firebase_ui_auth.dart";
+
 import "package:proyecto/features/pets/pet_create_screen.dart";
+import "package:proyecto/services/citas_service.dart";
 import "package:proyecto/shared/widgets/pets_summary_card.dart";
 import "package:proyecto/theme/app_colors.dart";
 import "package:proyecto/routes/app_routes.dart";
@@ -16,28 +18,20 @@ class UserScreen extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final csTheme = Theme.of(context).colorScheme;
     final user = FirebaseAuth.instance.currentUser;
-    final String userPath = "/usuarios/${user?.uid}";
+
+    if (user == null) {
+      return const Scaffold(
+        body: Center(child: Text("No hay usuario autenticado.")),
+      );
+    }
+
+    final userRef = FirebaseFirestore.instance
+        .collection("usuarios")
+        .doc(user.uid);
+    final String userPath = "/usuarios/${user.uid}";
     print(userPath);
 
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text("Perfil"),
-      //   actions: [
-      //     IconButton(
-      //       icon: const Icon(Icons.logout),
-      //       tooltip: "Cerrar sesión",
-      //       onPressed: () async {
-      //         await FirebaseAuth.instance.signOut();
-      //         // También cierra sesión de proveedores (Google, etc.)
-      //         await FirebaseUIAuth.signOut(context: context);
-      //         if (context.mounted) {
-      //           Navigator.pushNamedAndRemoveUntil(context, "/login", (_) => false);
-      //         }
-      //       },
-      //     )
-      //   ],
-      // ),
-      // esto pudiera servir como ejemplo para cerrar sesion desde la parte de arriba
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -49,10 +43,10 @@ class UserScreen extends StatelessWidget {
                   CircleAvatar(
                     radius: 36,
                     backgroundColor: AppColors.primaryGreen,
-                    backgroundImage: user?.photoURL != null
-                        ? NetworkImage(user!.photoURL!)
+                    backgroundImage: user.photoURL != null
+                        ? NetworkImage(user.photoURL!)
                         : null,
-                    child: user?.photoURL == null
+                    child: user.photoURL == null
                         ? const Icon(
                             Icons.person,
                             color: Colors.white,
@@ -66,14 +60,14 @@ class UserScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        user?.displayName ?? "Usuario sin nombre",
+                        user.displayName ?? "Usuario sin nombre",
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: csTheme.onSurface,
                         ),
                       ),
                       Text(
-                        user?.email ?? "Correo no disponible",
+                        user.email ?? "Correo no disponible",
                         style: textTheme.bodyMedium?.copyWith(
                           color: csTheme.onSurface.withOpacity(0.8),
                         ),
@@ -97,9 +91,7 @@ class UserScreen extends StatelessWidget {
                         color: csTheme.onSurface,
                       ),
                     ),
-
                     const SizedBox(width: 8),
-
                     ElevatedButton.icon(
                       icon: const Icon(Icons.add, color: Colors.white),
                       label: const Text("Agregar mascota"),
@@ -129,10 +121,7 @@ class UserScreen extends StatelessWidget {
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection("mascotas")
-                    .where(
-                      "dueno",
-                      isEqualTo: FirebaseFirestore.instance.doc(userPath),
-                    )
+                    .where("dueno", isEqualTo: userRef)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -188,21 +177,52 @@ class UserScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
               const SizedBox(height: 8),
 
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection("citas")
-                    .where("usuario", isEqualTo: userPath)
                     .where("estado", isEqualTo: "pendiente")
-                    .orderBy("Fecha", descending: false)
+                    .orderBy("fecha", descending: false)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+
+                  if (!snapshot.hasData) {
+                    return const SizedBox.shrink();
+                  }
+
+                  print("=== DEBUG CITAS PENDIENTES ===");
+                  print("userRef.path = ${userRef.path}");
+                  print("userPath = $userPath");
+
+                  print("---- RAW DOCUMENTS ----");
+                  for (var d in snapshot.data!.docs) {
+                    final data = d.data() as Map<String, dynamic>;
+                    print("ID: ${d.id}");
+                    print(
+                      "usuario: ${data["usuario"]}  TYPE: ${data["usuario"].runtimeType}",
+                    );
+                    print("estado: ${data["estado"]}");
+                    print("fecha: ${data["fecha"]}");
+                  }
+
+                  final docsFiltrados = snapshot.data!.docs.where((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final u = data["usuario"];
+
+                    if (u is DocumentReference) {
+                      return u.path == userRef.path;
+                    }
+                    if (u is String) {
+                      return u == userPath || u == userRef.path;
+                    }
+                    return false;
+                  }).toList();
+
+                  if (docsFiltrados.isEmpty) {
                     return Container(
                       padding: const EdgeInsets.all(16),
                       width: double.infinity,
@@ -214,43 +234,228 @@ class UserScreen extends StatelessWidget {
                     );
                   }
 
-                  final proximaCita =
-                      snapshot.data!.docs.first.data() as Map<String, dynamic>;
-                  final Timestamp? ts = proximaCita["Fecha"];
-                  final String fechaTexto = ts != null
-                      ? ts.toDate().toString().substring(0, 16)
-                      : "Sin fecha";
-                  final String nombreDoctor = proximaCita["Doctor"];
+                  return cs.CarouselSlider(
+                    options: cs.CarouselOptions(
+                      height: 200,
+                      enlargeCenterPage: true,
+                      autoPlay: false,
+                      enableInfiniteScroll: false,
+                      viewportFraction: 0.85,
+                    ),
+                    items: docsFiltrados.map((doc) {
+                      final data = doc.data() as Map<String, dynamic>;
+                      final Timestamp? ts = data["fecha"];
+                      final fecha = ts?.toDate();
+                      final fechaTexto = fecha != null
+                          ? "${fecha.day}/${fecha.month}/${fecha.year} "
+                                "${fecha.hour.toString().padLeft(2, '0')}:"
+                                "${fecha.minute.toString().padLeft(2, '0')}"
+                          : "Sin fecha";
 
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceVariant,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Theme.of(context).dividerColor,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Motivo: ${proximaCita["Motivo"]}",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text("Fecha: $fechaTexto"),
-                              Text("Estado: ${proximaCita["estado"]}"),
-                              Text("Doctor: $nombreDoctor"),
-                            ],
-                          ),
+                      return Container(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryGreen,
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
-                    ],
+                        child: Stack(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    data["motivo"] ?? "Cita pendiente",
+                                    style: textTheme.titleMedium?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    fechaTexto,
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Pendiente",
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 10),
+
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      TextButton.icon(
+                                        icon: const Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                        ),
+                                        label: const Text(
+                                          "Cancelar",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                        onPressed: () async {
+                                          await FirebaseFirestore.instance
+                                              .collection("citas")
+                                              .doc(doc.id)
+                                              .update({"estado": "cancelada"});
+
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text("Cita cancelada"),
+                                            ),
+                                          );
+                                        },
+                                      ),
+
+                                      const SizedBox(width: 16),
+
+                                      TextButton.icon(
+                                        icon: const Icon(
+                                          Icons.edit_calendar,
+                                          color: Colors.white,
+                                        ),
+                                        label: const Text(
+                                          "Reprogramar",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                        onPressed: () async {
+                                          final data =
+                                              doc.data()
+                                                  as Map<String, dynamic>;
+
+                                          final servicio =
+                                              data["tipo"]; // veterinario / paseo / grooming
+
+                                          final doctorRef =
+                                              data["doctor"]
+                                                  as DocumentReference?;
+                                          final paseadorRef =
+                                              data["paseador"]
+                                                  as DocumentReference?;
+                                          final veterinariaRef =
+                                              data["veterinaria"]
+                                                  as DocumentReference?;
+
+                                          final mascotaRef =
+                                              data["mascota"]
+                                                  as DocumentReference;
+                                          final usuarioRef =
+                                              data["usuario"]
+                                                  as DocumentReference;
+
+                                          final DateTime? dia =
+                                              await showDatePicker(
+                                                context: context,
+                                                initialDate:
+                                                    fecha ?? DateTime.now(),
+                                                firstDate: DateTime.now(),
+                                                lastDate: DateTime.now().add(
+                                                  const Duration(days: 365),
+                                                ),
+                                              );
+
+                                          if (dia == null) return;
+
+                                          final ocupados = await CitasService()
+                                              .obtenerHorariosOcupados(
+                                                tipo: servicio,
+                                                dia: dia,
+                                                doctor: doctorRef,
+                                                paseador: paseadorRef,
+                                                veterinaria: veterinariaRef,
+                                                usuarioRef: usuarioRef,
+                                              );
+
+                                          final disponibles = CitasService()
+                                              .generarSlotsDisponibles(
+                                                dia,
+                                                ocupados,
+                                              );
+
+                                          if (disponibles.isEmpty) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  "No hay horarios disponibles este día.",
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+
+                                          final seleccionado =
+                                              await showModalBottomSheet<
+                                                DateTime
+                                              >(
+                                                context: context,
+                                                builder: (_) => _HorariosSheet(
+                                                  slots: disponibles,
+                                                ),
+                                              );
+
+                                          if (seleccionado == null) return;
+
+                                          final disponible =
+                                              await CitasService()
+                                                  .verificarDisponibilidad(
+                                                    tipo: servicio,
+                                                    fecha: seleccionado,
+                                                    doctor: doctorRef,
+                                                    paseador: paseadorRef,
+                                                    veterinaria: veterinariaRef,
+                                                  );
+
+                                          if (!disponible) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  "Ese horario se ocupó hace un momento.",
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+
+                                          await FirebaseFirestore.instance
+                                              .collection("citas")
+                                              .doc(doc.id)
+                                              .update({"fecha": seleccionado});
+
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                "Cita reprogramada con éxito",
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
                   );
                 },
               ),
@@ -267,21 +472,24 @@ class UserScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
               const SizedBox(height: 8),
 
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection("citas")
-                    .where("usuario", isEqualTo: userPath)
+                    .where("usuario", isEqualTo: userRef)
                     .where("estado", isNotEqualTo: "pendiente")
-                    .orderBy("Fecha", descending: true)
+                    .orderBy("estado")
+                    .orderBy("fecha", descending: true)
                     .snapshots(),
                 builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                     return Container(
                       padding: const EdgeInsets.all(16),
-                      width: double.infinity,
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surfaceVariant,
                         borderRadius: BorderRadius.circular(8),
@@ -294,58 +502,58 @@ class UserScreen extends StatelessWidget {
 
                   return cs.CarouselSlider(
                     options: cs.CarouselOptions(
-                      height: 150,
+                      height: 200,
                       enlargeCenterPage: true,
                       autoPlay: false,
-                      aspectRatio: 16 / 9,
                     ),
                     items: docs.map((doc) {
                       final data = doc.data() as Map<String, dynamic>;
-                      final Timestamp? ts = data["Fecha"];
-                      final dateStr = ts != null
-                          ? "${ts.toDate().day}/${ts.toDate().month} ${ts.toDate().hour}:${ts.toDate().minute}"
-                          : "";
+                      final ts = data["fecha"] as Timestamp?;
 
-                      return Builder(
-                        builder: (BuildContext context) {
-                          return Container(
-                            width: MediaQuery.of(context).size.width * 0.8,
-                            margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryGreen,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    data["Motivo"] ?? "Cita",
-                                    style: textTheme.titleMedium?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    dateStr,
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Text(
-                                    data["estado"] ?? "",
-                                    style: textTheme.bodySmall?.copyWith(
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
+                      if (ts == null) {
+                        return const SizedBox();
+                      }
+
+                      final fecha = ts.toDate();
+                      final fechaString =
+                          "${fecha.day}/${fecha.month} ${fecha.hour.toString().padLeft(2, '0')}:${fecha.minute.toString().padLeft(2, '0')}";
+
+                      return Container(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryGreen,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                data["motivo"] ?? "Cita",
+                                style: textTheme.titleMedium?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                            ),
-                          );
-                        },
+                              const SizedBox(height: 8),
+                              Text(
+                                fechaString,
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Text(
+                                data["estado"] ?? "",
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       );
                     }).toList(),
                   );
@@ -385,6 +593,44 @@ class UserScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _HorariosSheet extends StatelessWidget {
+  final List<DateTime> slots;
+
+  const _HorariosSheet({required this.slots});
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      height: 400,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Horarios disponibles", style: tt.titleLarge),
+          const SizedBox(height: 12),
+          Expanded(
+            child: ListView.builder(
+              itemCount: slots.length,
+              itemBuilder: (_, i) {
+                final s = slots[i];
+                final label =
+                    "${s.hour.toString().padLeft(2, '0')}:${s.minute.toString().padLeft(2, '0')}";
+
+                return ListTile(
+                  title: Text(label),
+                  onTap: () => Navigator.pop(context, s),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
