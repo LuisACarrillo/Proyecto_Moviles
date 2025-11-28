@@ -221,10 +221,7 @@ class VetProfile extends StatelessWidget {
                       Navigator.pushNamed(
                         context,
                         AppRoutes.appointmentForm,
-                        arguments: AppointmentArgs(
-                          petName: "",
-                          defaultReason: "Consulta General"
-                        ),
+
                       );
                     },
                   ),

@@ -50,10 +50,7 @@ class VetsScreen extends StatelessWidget {
                     Navigator.pushNamed(
                       context,
                       AppRoutes.appointmentForm,
-                      arguments: AppointmentArgs(
-                        petName: 'name',
-                        defaultReason: 'Consulta general',
-                      ),
+
                     );
                   },
                   child: Text('Buscar', style: TextStyle(color: cs.primary)),

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:proyecto/features/home/widgets/next_appointment_card.dart';
-import 'package:proyecto/features/home/widgets/doctor_carousel.dart';
-import 'package:proyecto/theme/app_colors.dart';
-import 'package:proyecto/main.dart' show themeController;
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MapScreen extends StatefulWidget {
@@ -13,33 +10,47 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  late GoogleMapController mapController;
+  GoogleMapController? _mapController;
 
-  final LatLng _center = const LatLng(45.521563, -122.677433);
+  static const LatLng _center = LatLng(20.609055, -103.4145943);
 
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
+  String? _darkMapStyle;
+  String? _lightMapStyle;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMapStyles();
   }
 
- @override
+  Future<void> _loadMapStyles() async {
+    _darkMapStyle = await rootBundle.loadString('assets/map_styles/dark.json');
+    _lightMapStyle = await rootBundle.loadString(
+      'assets/map_styles/light.json',
+    );
+    setState(() {});
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    _mapController = controller;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final textTheme = Theme.of(context).textTheme;
-    final cs = Theme.of(context).colorScheme;
+    final String? style = isDark ? _darkMapStyle : _lightMapStyle;
 
-    return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.green[700],
-      ),
-      home: Scaffold(
-        body: GoogleMap(
-          onMapCreated: _onMapCreated,
-          initialCameraPosition: CameraPosition(
-            target: _center,
-            zoom: 11.0,
-          ),
+    return Scaffold(
+      body: GoogleMap(
+        onMapCreated: _onMapCreated,
+        initialCameraPosition: const CameraPosition(
+          target: _center,
+          zoom: 16.0,
         ),
+        style: style,
+        myLocationButtonEnabled: true,
+        zoomControlsEnabled: true,
       ),
     );
   }

@@ -11,7 +11,9 @@ class OrdenService {
     return ref.id;
   }
 
-  Future<List<Orden>> obtenerOrdenesDeUsuario(DocumentReference usuarioRef) async {
+  Future<List<Orden>> obtenerOrdenesDeUsuario(
+    DocumentReference usuarioRef,
+  ) async {
     final snap = await _col.where('usuario', isEqualTo: usuarioRef).get();
     return snap.docs.map((d) => Orden.fromSnapshot(d)).toList();
   }
@@ -32,4 +34,3 @@ class OrdenService {
     await _col.doc(id).delete();
   }
 }
-  

@@ -74,7 +74,7 @@ class _PetCreateScreenState extends State<PetCreateScreen> {
         'especie': _species,
         'raza': _breedCtrl.text.trim(),
         'edad': int.parse(_ageCtrl.text.trim()),
-        'dueno': _userPath, // Storing reference as string based on your schema
+        'dueno': FirebaseFirestore.instance.doc(_userPath!), 
         'proxima_vacuna': _selectedDate != null ? Timestamp.fromDate(_selectedDate!) : null,
         'creado_en': FieldValue.serverTimestamp(),
       });

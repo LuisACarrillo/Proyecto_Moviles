@@ -1,19 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:proyecto/shared/widgets/custom_card.dart';
-import 'package:proyecto/shared/widgets/app_text_field.dart';
-import 'package:proyecto/shared/widgets/primary_button.dart';
-import 'package:proyecto/shared/widgets/secondary_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:proyecto/models/cita.dart';
+import 'package:proyecto/services/citas_service.dart';
+import 'package:proyecto/services/mascotas_service.dart';
+import 'package:proyecto/services/doctores_service.dart';
+import 'package:proyecto/services/paseadores_service.dart';
+import 'package:proyecto/services/veterinarias_service.dart';
 
-import 'package:proyecto/firestore_service.dart';
-
-
-class AppointmentArgs {
-  final String petName;
-  final String? defaultReason;
-  const AppointmentArgs({required this.petName, this.defaultReason});
-}
+import 'package:proyecto/shared/widgets/custom_card.dart';
+import 'package:proyecto/shared/widgets/primary_button.dart';
 
 class AppointmentFormScreen extends StatefulWidget {
   const AppointmentFormScreen({super.key});
@@ -23,103 +20,27 @@ class AppointmentFormScreen extends StatefulWidget {
 }
 
 class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _petCtrl = TextEditingController();
-  final _reasonCtrl = TextEditingController();
-  final _dateCtrl = TextEditingController();
-  final _timeCtrl = TextEditingController();
-  String _service = 'Consulta general';
-  String? _walker_ ;
-  String _doctor = '';
-  
+  final _serviceCitas = CitasService();
+  final _serviceMascotas = MascotasService();
+  final _serviceDoctores = DoctoresService();
+  final _servicePaseadores = PaseadoresService();
+  final _serviceVeterinarias = VeterinariasService();
 
-  List<String> doctors = [
-    'Dr. House',
-    'Dra. Meredith Grey',
-    'Dr. Strange',
-    'No seleccionar', // opcional
-  ];
-  List<String> walkers = [
-  'Cristiano Ronaldo',
-  'Iker Casillas',
-  'Luis Miguel',
-  'No seleccionar',
-  ];
-  bool _loadingWalkers = true;
+  String? _servicio;
+  String? _especialidad;
+  String? _doctorId;
+  String? _paseadorId;
+  String? _mascotaId;
+  String? _veterinariaId;
 
-  bool _loadingDoctors = true;
-  final FirestoreService fs = FirestoreService();
-  bool _loadedArgs = false;
+  DocumentReference? _doctorRef;
+  DocumentReference? _veterinariaRef;
+  DocumentReference? _paseadorRef;
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_loadedArgs) return;
+  DateTime? _fecha;
+  String _motivo = "";
 
-    final args = ModalRoute.of(context)?.settings.arguments as AppointmentArgs?;
-    if (args != null) {
-      _petCtrl.text = args.petName;
-      _reasonCtrl.text = args.defaultReason ?? 'Consulta general';
-    }
-    _loadedArgs = true;
-    _loadDoctors(); 
-    _loadWalkers();
-  }
-
-  @override
-  void dispose() {
-    _petCtrl.dispose();
-    _reasonCtrl.dispose();
-    _dateCtrl.dispose();
-    _timeCtrl.dispose();
-    super.dispose();
-  
-  }
-
-
-
-  Future<void> _pickDate() async {
-    final now = DateTime.now();
-    final d = await showDatePicker(
-      context: context,
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 365)),
-      initialDate: now.add(const Duration(days: 1)),
-      helpText: 'Selecciona la fecha de la cita',
-    );
-    if (d != null) {
-      const months = [
-        'Ene',
-        'Feb',
-        'Mar',
-        'Abr',
-        'May',
-        'Jun',
-        'Jul',
-        'Ago',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dic',
-      ];
-      _dateCtrl.text = '${d.day} ${months[d.month - 1]} ${d.year}';
-      setState(() {});
-    }
-  }
-
-  Future<void> _pickTime() async {
-    final t = await showTimePicker(
-      context: context,
-      initialTime: const TimeOfDay(hour: 10, minute: 0),
-      helpText: 'Selecciona la hora',
-    );
-    if (t != null) {
-      final h = t.hour.toString().padLeft(2, '0');
-      final m = t.minute.toString().padLeft(2, '0');
-      _timeCtrl.text = '$h:$m';
-      setState(() {});
-    }
-  }
+  final String uid = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   Widget build(BuildContext context) {
@@ -127,328 +48,397 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: cs.surface,
       appBar: AppBar(
         title: Text(
-          'Agendar cita',
-          style: tt.titleLarge?.copyWith(
-            color: cs.primary,
-            fontWeight: FontWeight.w700,
-          ),
+          "Agendar cita",
+          style: tt.titleLarge?.copyWith(color: cs.primary),
         ),
         centerTitle: true,
-        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: CustomCard(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                AppTextField(
-                  controller: _petCtrl,
-                  label: 'Mascota',
-                  hint: 'Nombre de tu mascota',
-                  icon: Icons.pets,
-                  validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Ingresa el nombre'
-                      : null,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              StreamBuilder(
+                stream: _serviceMascotas.obtenerMascotasUsuario(uid),
+                builder: (context, snap) {
+                  if (!snap.hasData) return const LinearProgressIndicator();
+                  final mascotas = snap.data!;
+                  if (mascotas.isEmpty) {
+                    return const Text("No tienes mascotas registradas.");
+                  }
+
+                  return DropdownButtonFormField(
+                    decoration: const InputDecoration(
+                      labelText: "Mascota",
+                      prefixIcon: Icon(Icons.pets),
+                    ),
+                    value: _mascotaId,
+                    items: mascotas.map((m) {
+                      return DropdownMenuItem(
+                        value: m.id,
+                        child: Text(m.nombre),
+                      );
+                    }).toList(),
+                    onChanged: (v) => setState(() => _mascotaId = v),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              DropdownButtonFormField(
+                decoration: const InputDecoration(
+                  labelText: "Servicio",
+                  prefixIcon: Icon(Icons.miscellaneous_services),
                 ),
-                const SizedBox(height: 12),
-
-                DropdownButtonFormField<String>(
-                  value: _service,
-                  isExpanded: true,
-                  isDense: true,
-                  icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                  iconSize: 20,
-                  decoration: const InputDecoration(
-                    labelText: 'Servicio',
-                    prefixIcon: Icon(Icons.medical_services_outlined),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 14,
-                    ),
+                value: _servicio,
+                items: const [
+                  DropdownMenuItem(
+                    value: "Veterinario",
+                    child: Text("Veterinario"),
                   ),
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'Consulta general',
-                      child: Text('Consulta general'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Grooming',
-                      child: Text('Grooming'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Vacunación',
-                      child: Text('Vacunación'),
-                    ),
-                    DropdownMenuItem(value: 'Paseo', child: Text('Paseo')),
-                    DropdownMenuItem(
-                      value: 'Desparasitación',
-                      child: Text('Desparasitación'),
-                    ),
-                  ],
-                  onChanged: (v) =>
-                      setState(() => _service = v ?? 'Consulta general'),
-                  dropdownColor: Theme.of(context).colorScheme.surface,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
+                  DropdownMenuItem(value: "Paseo", child: Text("Paseo")),
+                  DropdownMenuItem(value: "Grooming", child: Text("Grooming")),
+                ],
+                onChanged: (v) {
+                  setState(() {
+                    _servicio = v;
+                    _especialidad = null;
+                    _doctorId = null;
+                    _paseadorId = null;
+                    _veterinariaId = null;
+                    _doctorRef = null;
+                    _paseadorRef = null;
+                    _veterinariaRef = null;
+                  });
+                },
+              ),
 
-                const SizedBox(height: 12),
-                 DropdownButtonFormField<String>(
-                  value: _doctor.isEmpty ? null : _doctor,
-                  isExpanded: true,
-                  isDense: true,
-                  hint: const Text("Selecciona un doctor"),
-                  icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                  iconSize: 20,
-                  decoration: const InputDecoration(
-                    labelText: 'Doctor',
-                    prefixIcon: Icon(Icons.local_hospital_outlined),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                  ),
-                  items: _loadingDoctors
-                  ? [const DropdownMenuItem(value: 'cargando', child: Text('Cargando...'))]
-                  : doctors.map((doc) => DropdownMenuItem(
-                      value: doc,
-                      child: Text(doc),
-                    )).toList(),
+              const SizedBox(height: 20),
 
-                  onChanged: (v) => setState(() => _doctor = v ?? ''),
-                  dropdownColor: Theme.of(context).colorScheme.surface,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
+              if (_servicio == "Grooming")
+                StreamBuilder(
+                  stream: _serviceVeterinarias.obtenerVeterinarias(),
+                  builder: (context, snap) {
+                    if (!snap.hasData) return const LinearProgressIndicator();
+                    final vets = snap.data!;
 
-
-                const SizedBox(height: 12),
-
-DropdownButtonFormField<String>(
-  value: _walker_,
-  isExpanded: true,
-  isDense: true,
-  hint: const Text("Selecciona un paseador"),
-  icon: const Icon(Icons.keyboard_arrow_down_rounded),
-  iconSize: 20,
-  decoration: const InputDecoration(
-    labelText: 'Paseador',
-    prefixIcon: Icon(Icons.person_outline),
-    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-  ),
-  items: _loadingWalkers
-      ? [const DropdownMenuItem(value: null, child: Text('Cargando...'))]
-      : walkers.map((walker) => DropdownMenuItem(
-            value: walker,
-            child: Text(walker),
-          )).toList(),
-  onChanged: (v) => setState(() => _walker_ = v),
-  dropdownColor: Theme.of(context).colorScheme.surface,
-  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-        color: Theme.of(context).colorScheme.onSurface,
-      ),
-),
-
-
-
-
-                                
-                const SizedBox(height: 12),
-
-
-                GestureDetector(
-                  onTap: _pickDate,
-                  child: AbsorbPointer(
-                    child: AppTextField(
-                      controller: _dateCtrl,
-                      label: 'Fecha',
-                      hint: 'Selecciona la fecha',
-                      icon: Icons.event,
-                      validator: (v) => (v == null || v.isEmpty)
-                          ? 'Selecciona la fecha'
-                          : null,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                GestureDetector(
-                  onTap: _pickTime,
-                  child: AbsorbPointer(
-                    child: AppTextField(
-                      controller: _timeCtrl,
-                      label: 'Hora',
-                      hint: 'Selecciona la hora',
-                      icon: Icons.schedule,
-                      validator: (v) => (v == null || v.isEmpty)
-                          ? 'Selecciona la hora'
-                          : null,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                AppTextField(
-                  controller: _reasonCtrl,
-                  label: 'Motivo',
-                  hint: 'Ej. revisión general / limpieza / vacuna…',
-                  icon: Icons.note_alt_outlined,
-                ),
-                const SizedBox(height: 16),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: SecondaryButton(
-                        text: 'Cancelar',
-                        onPressed: () => Navigator.pop(context),
+                    return SizedBox(
+                      width: double.infinity,
+                      child: DropdownButtonFormField<String>(
+                        isExpanded: true, // <- importantísimo
+                        decoration: const InputDecoration(
+                          labelText: "Veterinaria",
+                          prefixIcon: Icon(Icons.local_hospital),
+                          // puedes subir un poco el padding vertical si quieres
+                          contentPadding: EdgeInsets.symmetric(vertical: 8),
+                        ),
+                        value: _veterinariaId,
+                        items: vets.map((v) {
+                          final data = v.data() as Map<String, dynamic>;
+                          return DropdownMenuItem<String>(
+                            value: v.id,
+                            child: Text(
+                              data["nombre"] ?? "Veterinaria",
+                              maxLines: 2, // permite “bajar” el texto
+                              overflow: TextOverflow.ellipsis,
+                              softWrap: true,
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (v) {
+                          setState(() {
+                            _veterinariaId = v;
+                            _veterinariaRef = FirebaseFirestore.instance
+                                .collection("veterinarias")
+                                .doc(v);
+                          });
+                        },
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      // child: PrimaryButton(
-                      //   text: 'Confirmar cita',
-                      //   onPressed: () {
-                      //     if (_formKey.currentState!.validate()) {
-                      //       ScaffoldMessenger.of(context).showSnackBar(
-                      //         const SnackBar(content: Text('Cita agendada')),
-                      //       );
-                      //       Navigator.pop(context);
-                      //     }
-                      //   },
-                      // ),
-                          child: PrimaryButton(
-                            text: 'Confirmar cita',
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                _crearCita(); // aquí llamamos a la función global que guarda en Firestore
-                              }
-                            },
-                          )
-                        ,
-                    ),
-                  ],
+                    );
+                  },
                 ),
+
+              if (_servicio == "Paseo")
+                StreamBuilder(
+                  stream: _servicePaseadores.obtenerPaseadores(),
+                  builder: (context, snap) {
+                    if (!snap.hasData) return const LinearProgressIndicator();
+                    final paseadores = snap.data!;
+
+                    return DropdownButtonFormField(
+                      decoration: const InputDecoration(
+                        labelText: "Paseador",
+                        prefixIcon: Icon(Icons.directions_walk),
+                      ),
+                      value: _paseadorId,
+                      items: paseadores.map((p) {
+                        return DropdownMenuItem(
+                          value: p.id,
+                          child: Text(p.nombre),
+                        );
+                      }).toList(),
+                      onChanged: (v) {
+                        setState(() {
+                          _paseadorId = v;
+                          _paseadorRef = FirebaseFirestore.instance
+                              .collection("paseadores")
+                              .doc(v);
+                        });
+                      },
+                    );
+                  },
+                ),
+              if (_servicio == "Veterinario") ...[
+                StreamBuilder(
+                  stream: _serviceDoctores.obtenerEspecialidades(),
+                  builder: (context, snap) {
+                    if (!snap.hasData) return const LinearProgressIndicator();
+                    final especialidades = snap.data!;
+
+                    return DropdownButtonFormField(
+                      decoration: const InputDecoration(
+                        labelText: "Especialidad",
+                        prefixIcon: Icon(Icons.medical_services_outlined),
+                      ),
+                      value: _especialidad,
+                      items: especialidades.map((e) {
+                        return DropdownMenuItem(value: e, child: Text(e));
+                      }).toList(),
+                      onChanged: (v) {
+                        setState(() {
+                          _especialidad = v;
+                          _doctorId = null;
+                          _doctorRef = null;
+                          _veterinariaRef = null;
+                        });
+                      },
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                if (_especialidad != null)
+                  StreamBuilder(
+                    stream: _serviceDoctores.obtenerDoctoresPorEspecialidad(
+                      _especialidad!,
+                    ),
+                    builder: (context, snap) {
+                      if (!snap.hasData) return const LinearProgressIndicator();
+                      final doctores = snap.data!;
+
+                      return DropdownButtonFormField(
+                        decoration: const InputDecoration(
+                          labelText: "Doctor",
+                          prefixIcon: Icon(Icons.person_outline),
+                        ),
+                        value: _doctorId,
+                        items: doctores.map((d) {
+                          return DropdownMenuItem(
+                            value: d.id,
+                            child: Text(d.nombre),
+                          );
+                        }).toList(),
+                        onChanged: (v) {
+                          setState(() {
+                            _doctorId = v;
+                            final doctor = doctores.firstWhere(
+                              (d) => d.id == v,
+                            );
+
+                            _doctorRef = FirebaseFirestore.instance
+                                .collection("doctores")
+                                .doc(v);
+
+                            _veterinariaRef = doctor.ubicacion;
+                          });
+                        },
+                      );
+                    },
+                  ),
               ],
-            ),
+
+              const SizedBox(height: 20),
+
+              InkWell(
+                onTap: _seleccionarDia,
+                borderRadius: BorderRadius.circular(12),
+                child: InputDecorator(
+                  isEmpty: _fecha == null,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.calendar_today_outlined),
+                  ),
+                  child: Text(
+                    _fecha == null
+                        ? "Selecciona fecha"
+                        : "${_fecha!.day.toString().padLeft(2, '0')}/"
+                              "${_fecha!.month.toString().padLeft(2, '0')}/"
+                              "${_fecha!.year} – "
+                              "${_fecha!.hour.toString().padLeft(2, '0')}:"
+                              "${_fecha!.minute.toString().padLeft(2, '0')}",
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              TextField(
+                decoration: const InputDecoration(
+                  labelText: "Motivo de la cita",
+                  prefixIcon: Icon(Icons.note_add_outlined),
+                ),
+                onChanged: (v) => _motivo = v,
+              ),
+
+              const SizedBox(height: 32),
+              PrimaryButton(text: "Confirmar cita", onPressed: _crearCita),
+            ],
           ),
         ),
       ),
     );
   }
 
-    Future<void> _crearCita() async {
-      try {
-        final docRef = FirebaseFirestore.instance.collection('citas').doc(); // ID automático
-        final idGenerado = docRef.id;
+  Future<void> _seleccionarDia() async {
+    final DateTime? dia = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
 
-        final citaData = {
-          'id': idGenerado,
-          'petName': _petCtrl.text.trim(),
-          'service': _service,
-          'walker': _walker_,
-          'doctor': _doctor.isEmpty ? null : _doctor,
-          'date': _dateCtrl.text.trim(),
-          'time': _timeCtrl.text.trim(),
-          'reason': _reasonCtrl.text.trim(),
-        };
+    if (dia == null) return;
 
-        await docRef.set(citaData);
+    final ocupados = await _serviceCitas.obtenerHorariosOcupados(
+      tipo: _servicio!,
+      dia: dia,
+      doctor: _doctorRef,
+      paseador: _paseadorRef,
+      veterinaria: _veterinariaRef,
+      usuarioRef: FirebaseFirestore.instance.collection("usuarios").doc(uid),
+    );
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cita creada con éxito. ID: $idGenerado')),
-        );
-        Navigator.pop(context);
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al crear la cita: $e')),
-        );
-      }
+    final disponibles = _serviceCitas.generarSlotsDisponibles(dia, ocupados);
+
+    if (disponibles.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No hay horarios disponibles este día.")),
+      );
+      return;
     }
 
+    final seleccionado = await showModalBottomSheet<DateTime>(
+      context: context,
+      builder: (_) => _HorariosSheet(slots: disponibles),
+    );
 
-Future<void> _loadDoctors() async {
-  setState(() => _loadingDoctors = true); // marcamos cargando
-  try {
-    final snapshot = await FirebaseFirestore.instance.collection('doctores').get();
-
-   // print('Docs recibidos de Firestore: ${snapshot.docs.length}');
-   // for (var doc in snapshot.docs) {
-     // print('Doctor: ${doc.data()}');
-   // }
-
-    if (snapshot.docs.isNotEmpty) {
-      final fetchedDoctors = snapshot.docs
-          .map((doc) => doc['Nombre'] as String)
-          .toList();
-      setState(() {
-        doctors = fetchedDoctors;
-        _loadingDoctors = false;
-      });
-    } else {
-      // colección vacía, usamos hardcode
-      setState(() {
-        doctors = [
-          'Dr. House',
-          'Dra. Meredith Grey',
-          'Dr. Strange',
-          'No seleccionar',
-        ];
-        _loadingDoctors = false;
-      });
+    if (seleccionado != null) {
+      setState(() => _fecha = seleccionado);
     }
-  } catch (e) {
-    // error leyendo la bd, usamos hardcode
-    setState(() {
-      doctors = [
-        'Dr. House',
-        'Dra. Meredith Grey',
-        'Dr. Strange',
-        'No seleccionar',
-      ];
-      _loadingDoctors = false;
-    });
-    print('Error cargando doctores: $e');
+  }
+
+  Future<void> _crearCita() async {
+    if (!(_fecha!.minute == 0 || _fecha!.minute == 30)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Las citas solo pueden ser a la hora o y media (ej: 10:00, 10:30).",
+          ),
+        ),
+      );
+      return;
+    }
+
+    final disponible = await _serviceCitas.verificarDisponibilidad(
+      tipo: _servicio!,
+      fecha: _fecha!,
+      doctor: _doctorRef,
+      paseador: _paseadorRef,
+      veterinaria: _veterinariaRef,
+    );
+
+    if (!disponible) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("El horario elegido ya está ocupado.")),
+      );
+      return;
+    }
+
+    if (_mascotaId == null || _fecha == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Completa todos los campos")),
+      );
+      return;
+    }
+
+    final cita = Cita(
+      id: "",
+      usuario: FirebaseFirestore.instance.collection("usuarios").doc(uid),
+      mascota: FirebaseFirestore.instance
+          .collection("mascotas")
+          .doc(_mascotaId),
+
+      fecha: _fecha!,
+      motivo: _motivo,
+      estado: "pendiente",
+
+      tipo: _servicio ?? "otro",
+
+      doctor: _doctorRef,
+      paseador: _paseadorRef,
+      veterinaria: _veterinariaRef,
+    );
+
+    await _serviceCitas.crearCita(cita);
+
+    if (!mounted) return;
+    Navigator.pop(context);
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Cita creada con éxito")));
   }
 }
 
-Future<void> _loadWalkers() async {
-  setState(() => _loadingWalkers = true);
-  try {
-    final snapshot = await FirebaseFirestore.instance.collection('paseador').get();
+class _HorariosSheet extends StatelessWidget {
+  final List<DateTime> slots;
 
-    if (snapshot.docs.isNotEmpty) {
-      final fetchedWalkers = snapshot.docs.map((doc) => doc['Nombre'] as String).toList();
-      setState(() {
-        walkers = fetchedWalkers;
-        _loadingWalkers = false;
-        _walker_ = null;
-      });
-    } else {
-      // fallback hardcodeado
-      setState(() {
-        walkers = ['Cristiano Ronaldo', 'Iker Casillas', 'Luis Miguel', 'No seleccionar'];
-        _loadingWalkers = false;
-        _walker_ = null;
-      });
-    }
-  } catch (e) {
-    // error leyendo Firestore, fallback hardcodeado
-    setState(() {
-      walkers = ['Cristiano Ronaldo', 'Iker Casillas', 'Luis Miguel', 'No seleccionar'];
-      _loadingWalkers = false;
-      _walker_ = null;
-    });
-    print('Error cargando paseadores: $e');
+  const _HorariosSheet({required this.slots});
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      height: 400,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Horarios disponibles", style: tt.titleLarge),
+          const SizedBox(height: 12),
+          Expanded(
+            child: ListView.builder(
+              itemCount: slots.length,
+              itemBuilder: (_, i) {
+                final s = slots[i];
+                final label =
+                    "${s.hour.toString().padLeft(2, '0')}:${s.minute.toString().padLeft(2, '0')}";
+
+                return ListTile(
+                  title: Text(label),
+                  onTap: () => Navigator.pop(context, s),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
-}
-
-
-
-
-
 }
