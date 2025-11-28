@@ -5,14 +5,14 @@ class Doctor {
   final String nombre;
   final String especialidad;
   final String contacto;
-  final DocumentReference veterinaria;
+  final DocumentReference ubicacion;
 
   Doctor({
     required this.id,
     required this.nombre,
     required this.especialidad,
     required this.contacto,
-    required this.veterinaria,
+    required this.ubicacion,
   });
 
   factory Doctor.fromSnapshot(DocumentSnapshot snap) {
@@ -22,7 +22,7 @@ class Doctor {
       nombre: data['nombre'],
       especialidad: data['especialidad'],
       contacto: data['contacto'],
-      veterinaria: data['veterinaria'],
+      ubicacion: data['ubicacion'],
     );
   }
 }

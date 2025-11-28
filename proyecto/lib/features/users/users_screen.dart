@@ -43,7 +43,6 @@ class UserScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -54,7 +53,11 @@ class UserScreen extends StatelessWidget {
                         ? NetworkImage(user!.photoURL!)
                         : null,
                     child: user?.photoURL == null
-                        ? const Icon(Icons.person, color: Colors.white, size: 36)
+                        ? const Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 36,
+                          )
                         : null,
                   ),
                   const SizedBox(width: 16),
@@ -95,14 +98,17 @@ class UserScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(width: 8,),
+                    const SizedBox(width: 8),
 
                     ElevatedButton.icon(
                       icon: const Icon(Icons.add, color: Colors.white),
                       label: const Text("Agregar mascota"),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryGreen,
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 12,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -123,7 +129,10 @@ class UserScreen extends StatelessWidget {
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection("mascotas")
-                    .where("dueno", isEqualTo: userPath)
+                    .where(
+                      "dueno",
+                      isEqualTo: FirebaseFirestore.instance.doc(userPath),
+                    )
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -163,15 +172,13 @@ class UserScreen extends StatelessWidget {
                     );
                   }).toList();
 
-                  return Column(
-                    children: petCards,
-                  );
+                  return Column(children: petCards);
                 },
               ),
 
               const SizedBox(height: 32),
 
-             Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   "Citas pendientes",
@@ -200,14 +207,15 @@ class UserScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       width: double.infinity,
                       decoration: BoxDecoration(
-                         color: Theme.of(context).colorScheme.surfaceVariant,
-                         borderRadius: BorderRadius.circular(8),
+                        color: Theme.of(context).colorScheme.surfaceVariant,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text("No tienes citas próximas.")
+                      child: const Text("No tienes citas próximas."),
                     );
                   }
 
-                  final proximaCita = snapshot.data!.docs.first.data() as Map<String, dynamic>;
+                  final proximaCita =
+                      snapshot.data!.docs.first.data() as Map<String, dynamic>;
                   final Timestamp? ts = proximaCita["Fecha"];
                   final String fechaTexto = ts != null
                       ? ts.toDate().toString().substring(0, 16)
@@ -222,14 +230,18 @@ class UserScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.surfaceVariant,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Theme.of(context).dividerColor),
+                            border: Border.all(
+                              color: Theme.of(context).dividerColor,
+                            ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 "Motivo: ${proximaCita["Motivo"]}",
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               Text("Fecha: $fechaTexto"),
                               Text("Estado: ${proximaCita["estado"]}"),
@@ -271,10 +283,10 @@ class UserScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       width: double.infinity,
                       decoration: BoxDecoration(
-                         color: Theme.of(context).colorScheme.surfaceVariant,
-                         borderRadius: BorderRadius.circular(8),
+                        color: Theme.of(context).colorScheme.surfaceVariant,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text("No tienes citas en tu historial.")
+                      child: const Text("No tienes citas en tu historial."),
                     );
                   }
 
@@ -311,19 +323,23 @@ class UserScreen extends StatelessWidget {
                                   Text(
                                     data["Motivo"] ?? "Cita",
                                     style: textTheme.titleMedium?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
                                     dateStr,
-                                    style: textTheme.bodyMedium?.copyWith(color: Colors.white),
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: Colors.white,
+                                    ),
                                   ),
                                   Text(
                                     data["estado"] ?? "",
-                                    style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: Colors.white70,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -333,7 +349,7 @@ class UserScreen extends StatelessWidget {
                       );
                     }).toList(),
                   );
-                }
+                },
               ),
 
               const SizedBox(height: 24),
@@ -345,7 +361,10 @@ class UserScreen extends StatelessWidget {
                   label: const Text("Cerrar sesión"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryGreen,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -354,7 +373,11 @@ class UserScreen extends StatelessWidget {
                     await FirebaseAuth.instance.signOut();
                     await FirebaseUIAuth.signOut(context: context);
                     if (context.mounted) {
-                      Navigator.pushNamedAndRemoveUntil(context, "/login", (_) => false);
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        "/login",
+                        (_) => false,
+                      );
                     }
                   },
                 ),

@@ -128,10 +128,6 @@ class DoctorProfile extends StatelessWidget {
                     Navigator.pushNamed(
                       context,
                       AppRoutes.appointmentForm,
-                      arguments: AppointmentArgs(
-                        petName: 'mascota',
-                        defaultReason: 'Consulta general',
-                      ),
                     );
                   },
                   child: Text(

@@ -46,10 +46,7 @@ class GroomingScreen extends StatelessWidget {
                     Navigator.pushNamed(
                       context,
                       AppRoutes.appointmentForm,
-                      arguments: AppointmentArgs(
-                        petName: 'name',
-                        defaultReason: 'Grooming',
-                      ),
+
                     );
                   },
                   child: Text('Agendar', style: TextStyle(color: cs.primary)),

@@ -187,10 +187,7 @@ class PetProfileScreen extends StatelessWidget {
                     Navigator.pushNamed(
                       context,
                       AppRoutes.appointmentForm,
-                      arguments: AppointmentArgs(
-                        petName: name,
-                        defaultReason: 'Consulta general',
-                      ),
+
                     );
                   },
                 ),

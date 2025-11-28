@@ -43,14 +43,7 @@ class WalksScreen extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      AppRoutes.appointmentForm,
-                      arguments: AppointmentArgs(
-                        petName: 'name',
-                        defaultReason: 'Paseo',
-                      ),
-                    );
+                    Navigator.pushNamed(context, AppRoutes.appointmentForm);
                   },
                   child: Text('Solicitar', style: TextStyle(color: cs.primary)),
                 ),
