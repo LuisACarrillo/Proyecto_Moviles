@@ -1,8 +1,11 @@
 import "package:cloud_firestore/cloud_firestore.dart";
+import "package:firebase_storage/firebase_storage.dart";
 import "package:flutter/material.dart";
 import "package:carousel_slider/carousel_slider.dart" as cs;
 import "package:firebase_auth/firebase_auth.dart";
 import "package:firebase_ui_auth/firebase_ui_auth.dart";
+import "package:image_picker/image_picker.dart";
+import 'dart:convert';
 
 import "package:proyecto/features/pets/pet_create_screen.dart";
 import "package:proyecto/services/citas_service.dart";
@@ -126,20 +129,39 @@ class UserScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 36,
-                    backgroundColor: AppColors.primaryGreen,
-                    backgroundImage: user.photoURL != null
-                        ? NetworkImage(user.photoURL!)
-                        : null,
-                    child: user.photoURL == null
-                        ? const Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 36,
-                          )
-                        : null,
+                  StreamBuilder<DocumentSnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection("usuarios")
+                        .doc(user.uid)
+                        .snapshots(),
+                    builder: (context, snap) {
+                      String? foto = snap.data?["foto"];
+
+                      ImageProvider? avatar;
+
+                      if (foto != null && foto.startsWith("data:image")) {
+                        final bytes = base64Decode(foto.split(",").last);
+                        avatar = MemoryImage(bytes);
+                      }
+
+                      return GestureDetector(
+                        onTap: () => _mostrarOpcionesFoto(context, user),
+                        child: CircleAvatar(
+                          radius: 36,
+                          backgroundColor: AppColors.primaryGreen,
+                          backgroundImage: avatar,
+                          child: avatar == null
+                              ? const Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.white,
+                                  size: 32,
+                                )
+                              : null,
+                        ),
+                      );
+                    },
                   ),
+
                   const SizedBox(width: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -670,5 +692,71 @@ class _HorariosSheet extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+Future<void> _mostrarOpcionesFoto(BuildContext context, User user) async {
+  showModalBottomSheet(
+    context: context,
+    builder: (_) {
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo),
+              title: const Text("Elegir de galería"),
+              onTap: () async {
+                Navigator.pop(context);
+                await _cambiarFotoPerfil(context, user, ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text("Tomar foto"),
+              onTap: () async {
+                Navigator.pop(context);
+                await _cambiarFotoPerfil(context, user, ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+Future<void> _cambiarFotoPerfil(
+  BuildContext context,
+  User user,
+  ImageSource source,
+) async {
+  try {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: source,
+      maxWidth: 512,
+      maxHeight: 512,
+      imageQuality: 70,
+    );
+
+    if (picked == null) return;
+
+    final bytes = await picked.readAsBytes();
+    final base64Img = "data:image/jpeg;base64,${base64Encode(bytes)}";
+
+    // Guardamos SOLO en Firestore
+    await FirebaseFirestore.instance
+        .collection("usuarios")
+        .doc(user.uid)
+        .update({"foto": base64Img});
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Foto de perfil actualizada")));
+  } catch (e) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("Error al subir foto: $e")));
   }
 }
