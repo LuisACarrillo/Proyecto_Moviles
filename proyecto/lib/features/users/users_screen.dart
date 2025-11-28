@@ -10,6 +10,92 @@ import "package:proyecto/shared/widgets/pets_summary_card.dart";
 import "package:proyecto/theme/app_colors.dart";
 import "package:proyecto/routes/app_routes.dart";
 
+class CitaInfoWidget extends StatelessWidget {
+  final Map<String, dynamic> data;
+  final String fechaTexto;
+
+  const CitaInfoWidget({
+    super.key,
+    required this.data,
+    required this.fechaTexto,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    final doctorRef = data["doctor"] as DocumentReference?;
+    final vetRef = data["veterinaria"] as DocumentReference?;
+    final paseadorRef = data["paseador"] as DocumentReference?;
+
+    return FutureBuilder(
+      future: _loadExtraInfo(doctorRef, vetRef, paseadorRef),
+      builder: (context, snap) {
+        String extra = "";
+        if (snap.hasData) extra = snap.data as String;
+
+        return Column(
+          children: [
+            Text(
+              data["motivo"] ?? "Cita",
+              style: textTheme.titleMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            if (extra.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                extra,
+                style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+                textAlign: TextAlign.center,
+              ),
+            ],
+
+            const SizedBox(height: 6),
+            Text(
+              fechaTexto,
+              style: textTheme.bodyMedium?.copyWith(color: Colors.white),
+            ),
+            Text(
+              data["estado"] ?? "",
+              style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<String> _loadExtraInfo(
+    DocumentReference? doctorRef,
+    DocumentReference? vetRef,
+    DocumentReference? paseadorRef,
+  ) async {
+    String result = "";
+
+    if (doctorRef != null) {
+      final doc = await doctorRef.get();
+      result += "Dr. ${doc["nombre"]}";
+    }
+
+    if (vetRef != null) {
+      final doc = await vetRef.get();
+      if (result.isNotEmpty) result += " – ";
+      result += "${doc["nombre"]}";
+    }
+
+    if (paseadorRef != null) {
+      final doc = await paseadorRef.get();
+      result += "Paseador: ${doc["nombre"]}";
+    }
+
+    return result;
+  }
+}
+
 class UserScreen extends StatelessWidget {
   const UserScreen({super.key});
 
@@ -194,21 +280,6 @@ class UserScreen extends StatelessWidget {
                     return const SizedBox.shrink();
                   }
 
-                  print("=== DEBUG CITAS PENDIENTES ===");
-                  print("userRef.path = ${userRef.path}");
-                  print("userPath = $userPath");
-
-                  print("---- RAW DOCUMENTS ----");
-                  for (var d in snapshot.data!.docs) {
-                    final data = d.data() as Map<String, dynamic>;
-                    print("ID: ${d.id}");
-                    print(
-                      "usuario: ${data["usuario"]}  TYPE: ${data["usuario"].runtimeType}",
-                    );
-                    print("estado: ${data["estado"]}");
-                    print("fecha: ${data["fecha"]}");
-                  }
-
                   final docsFiltrados = snapshot.data!.docs.where((doc) {
                     final data = doc.data() as Map<String, dynamic>;
                     final u = data["usuario"];
@@ -266,26 +337,9 @@ class UserScreen extends StatelessWidget {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    data["motivo"] ?? "Cita pendiente",
-                                    style: textTheme.titleMedium?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    fechaTexto,
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Text(
-                                    "Pendiente",
-                                    style: textTheme.bodySmall?.copyWith(
-                                      color: Colors.white70,
-                                    ),
+                                  CitaInfoWidget(
+                                    data: data,
+                                    fechaTexto: fechaTexto,
                                   ),
 
                                   const SizedBox(height: 10),
@@ -530,26 +584,9 @@ class UserScreen extends StatelessWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                data["motivo"] ?? "Cita",
-                                style: textTheme.titleMedium?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                fechaString,
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Text(
-                                data["estado"] ?? "",
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: Colors.white70,
-                                ),
+                              CitaInfoWidget(
+                                data: data,
+                                fechaTexto: fechaString,
                               ),
                             ],
                           ),
