@@ -14,7 +14,13 @@ class StoreScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: AppBar(
-        title: Text('Tienda', style: tt.titleLarge?.copyWith(color: cs.primary, fontWeight: FontWeight.w700)),
+        title: Text(
+          'Tienda',
+          style: tt.titleLarge?.copyWith(
+            color: cs.primary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         centerTitle: true,
         elevation: 0,
       ),
@@ -29,10 +35,14 @@ class StoreScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Explora alimentos y accesorios',
-                    style: tt.bodyMedium?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w600),
+                    style: tt.bodyMedium?.copyWith(
+                      color: cs.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 TextButton(
+<<<<<<< HEAD
                   onPressed: () 
                   {
                     DiscountState.descuentoActivo = false;
@@ -40,17 +50,28 @@ class StoreScreen extends StatelessWidget {
                     
                   },
                   child: Text('Ver catálogo', style: TextStyle(color: cs.primary)),
+=======
+                  onPressed: () =>
+                      Navigator.pushNamed(context, AppRoutes.storeDemo),
+                  child: Text(
+                    'Ver catálogo',
+                    style: TextStyle(color: cs.primary),
+                  ),
+>>>>>>> a77620177222bf43693d709467d14f14e0d50a1c
                 ),
               ],
             ),
           ),
           const SizedBox(height: 12),
+<<<<<<< HEAD
         //  CustomCard(
           //  child: Text(
             //  'Productos populares (pendiente)',
              // style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
             //),
           //),
+=======
+>>>>>>> a77620177222bf43693d709467d14f14e0d50a1c
         ],
       ),
     );

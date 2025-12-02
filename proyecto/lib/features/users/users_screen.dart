@@ -1,5 +1,4 @@
 import "package:cloud_firestore/cloud_firestore.dart";
-import "package:firebase_storage/firebase_storage.dart";
 import "package:flutter/material.dart";
 import "package:carousel_slider/carousel_slider.dart" as cs;
 import "package:firebase_auth/firebase_auth.dart";
@@ -81,18 +80,27 @@ class CitaInfoWidget extends StatelessWidget {
 
     if (doctorRef != null) {
       final doc = await doctorRef.get();
-      result += "Dr. ${doc["nombre"]}";
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>?;
+        result += "Dr. ${data?["nombre"] ?? "Sin nombre"}";
+      }
     }
 
     if (vetRef != null) {
       final doc = await vetRef.get();
-      if (result.isNotEmpty) result += " – ";
-      result += "${doc["nombre"]}";
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>?;
+        if (result.isNotEmpty) result += " – ";
+        result += "${data?["nombre"] ?? "Sin nombre"}";
+      }
     }
 
     if (paseadorRef != null) {
       final doc = await paseadorRef.get();
-      result += "Paseador: ${doc["nombre"]}";
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>?;
+        result += "Paseador: ${data?["nombre"] ?? "Sin nombre"}";
+      }
     }
 
     return result;
@@ -135,7 +143,24 @@ class UserScreen extends StatelessWidget {
                         .doc(user.uid)
                         .snapshots(),
                     builder: (context, snap) {
-                      String? foto = snap.data?["foto"];
+                      // Check if document exists before accessing fields
+                      if (!snap.hasData || !snap.data!.exists) {
+                        return GestureDetector(
+                          onTap: () => _mostrarOpcionesFoto(context, user),
+                          child: CircleAvatar(
+                            radius: 36,
+                            backgroundColor: AppColors.primaryGreen,
+                            child: const Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                              size: 32,
+                            ),
+                          ),
+                        );
+                      }
+
+                      final data = snap.data!.data() as Map<String, dynamic>?;
+                      String? foto = data?["foto"];
 
                       ImageProvider? avatar;
 

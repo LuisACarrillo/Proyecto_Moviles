@@ -55,12 +55,6 @@ class GroomingScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          CustomCard(
-            child: Text(
-              'Listado de estéticas cercanas (pendiente)',
-              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-            ),
-          ),
         ],
       ),
     );

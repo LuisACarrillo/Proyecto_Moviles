@@ -59,12 +59,6 @@ class VetsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          CustomCard(
-            child: Text(
-              'Listado de veterinarios cercanos (pendiente)',
-              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-            ),
-          ),
         ],
       ),
     );
