@@ -51,12 +51,6 @@ class WalksScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          CustomCard(
-            child: Text(
-              'Historial de paseos y recomendaciones (pendiente)',
-              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-            ),
-          ),
         ],
       ),
     );
