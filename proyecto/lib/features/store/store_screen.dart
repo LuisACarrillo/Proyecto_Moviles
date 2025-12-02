@@ -42,36 +42,25 @@ class StoreScreen extends StatelessWidget {
                   ),
                 ),
                 TextButton(
-<<<<<<< HEAD
-                  onPressed: () 
-                  {
+                  onPressed: () {
                     DiscountState.descuentoActivo = false;
                     Navigator.pushNamed(context, AppRoutes.storeDemo);
-                    
                   },
-                  child: Text('Ver catálogo', style: TextStyle(color: cs.primary)),
-=======
-                  onPressed: () =>
-                      Navigator.pushNamed(context, AppRoutes.storeDemo),
                   child: Text(
                     'Ver catálogo',
                     style: TextStyle(color: cs.primary),
                   ),
->>>>>>> a77620177222bf43693d709467d14f14e0d50a1c
                 ),
               ],
             ),
           ),
           const SizedBox(height: 12),
-<<<<<<< HEAD
-        //  CustomCard(
+          //  CustomCard(
           //  child: Text(
-            //  'Productos populares (pendiente)',
-             // style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-            //),
+          //  'Productos populares (pendiente)',
+          // style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
           //),
-=======
->>>>>>> a77620177222bf43693d709467d14f14e0d50a1c
+          //),
         ],
       ),
     );
