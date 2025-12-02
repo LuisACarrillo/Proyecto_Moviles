@@ -51,6 +51,7 @@ class _RegisterFormState extends State<RegisterForm> {
         'email': _emailCtrl.text.trim(),
         'creado': FieldValue.serverTimestamp(),
         'phone': _phoneNumber.text.trim(),
+        'foto': '',
       });
 
       await FirebaseAuth.instance.currentUser!
