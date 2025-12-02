@@ -28,7 +28,7 @@ class CartScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Carrito',
+          "Carrito",
           style: tt.titleLarge?.copyWith(
             color: cs.primary,
             fontWeight: FontWeight.w700,
@@ -42,7 +42,7 @@ class CartScreen extends StatelessWidget {
         child: cart.items.isEmpty
             ? Center(
                 child: Text(
-                  'Tu carrito está vacío 🐾',
+                  "Tu carrito está vacío 🐾",
                   style: tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
                 ),
               )
@@ -74,7 +74,7 @@ class CartScreen extends StatelessWidget {
                                       ),
                                     ),
                                     Text(
-                                      'MXN ${product.price.toStringAsFixed(2)}',
+                                      "MXN ${product.price.toStringAsFixed(2)}",
                                       style: tt.bodySmall?.copyWith(
                                         color: cs.primary,
                                       ),
@@ -90,7 +90,7 @@ class CartScreen extends StatelessWidget {
                                     ),
                                     onPressed: () => cart.remove(product),
                                   ),
-                                  Text('$qty'),
+                                  Text("$qty"),
                                   IconButton(
                                     icon: const Icon(Icons.add_circle_outline),
                                     onPressed: () => cart.add(product),
@@ -107,9 +107,7 @@ class CartScreen extends StatelessWidget {
 
                   // MOSTRAR TOTAL
                   Text(
-                    descuento
-                        ? 'Total (10% de descuento aplicado): MXN ${totalConDescuento.toStringAsFixed(2)}'
-                        : 'Total: MXN ${cart.totalPrice.toStringAsFixed(2)}',
+                    'Total: MXN ${cart.totalPrice.toStringAsFixed(2)}',
                     style: tt.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: cs.primary,

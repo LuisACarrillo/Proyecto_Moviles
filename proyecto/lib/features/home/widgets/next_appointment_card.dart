@@ -1,8 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:proyecto/features/home/next_appointment_screen.dart';
-import 'package:proyecto/shared/widgets/custom_card.dart';
+import "package:cloud_firestore/cloud_firestore.dart";
+import "package:firebase_auth/firebase_auth.dart";
+import "package:flutter/material.dart";
+import "package:proyecto/features/home/next_appointment_screen.dart";
+import "package:proyecto/shared/widgets/custom_card.dart";
 
 class NextAppointmentCard extends StatelessWidget {
   const NextAppointmentCard({super.key});
@@ -26,6 +26,7 @@ class NextAppointmentCard extends StatelessWidget {
           .snapshots(),
       builder: (context, snap) {
         if (!snap.hasData) return const SizedBox.shrink();
+
         final docsFiltrados = snap.data!.docs.where((doc) {
           final data = doc.data() as Map<String, dynamic>;
           final u = data["usuario"];
@@ -39,13 +40,15 @@ class NextAppointmentCard extends StatelessWidget {
 
         final doc = docsFiltrados.first;
         final data = doc.data() as Map<String, dynamic>;
+
+        // Datos para la UI de la tarjeta
         final ts = data["fecha"] as Timestamp?;
         final fecha = ts?.toDate();
 
         final fechaTexto = fecha != null
             ? "${fecha.day}/${fecha.month}/${fecha.year} "
-                  "${fecha.hour.toString().padLeft(2, '0')}:"
-                  "${fecha.minute.toString().padLeft(2, '0')}"
+                  "${fecha.hour.toString().padLeft(2, "0")}:"
+                  "${fecha.minute.toString().padLeft(2, "0")}"
             : "Fecha no disponible";
 
         final veterinariaRef =
@@ -55,7 +58,9 @@ class NextAppointmentCard extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const NextAppointmentScreen()),
+              MaterialPageRoute(
+                builder: (_) => NextAppointmentScreen(citaId: doc.id),
+              ),
             );
           },
           child: Row(
