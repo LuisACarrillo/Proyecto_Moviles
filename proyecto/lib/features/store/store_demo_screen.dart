@@ -76,7 +76,7 @@ class StoreDemoScreen extends StatelessWidget {
               id: doc.id,
               name: data["Producto"] ?? "Sin nombre",
               price: (data["Precio"] ?? 0).toDouble(),
-              image: "", // TODO: aquí pondrás la imagen cuando la agregues en Firestore
+              image: "", 
             );
           }).toList();
 
@@ -105,7 +105,6 @@ class StoreDemoScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(Icons.pets, size: 48), 
-                        // TODO: Reemplazar el icono por la imagen real del producto
                       ),
                     ),
                     const SizedBox(height: 8),

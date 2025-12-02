@@ -5,6 +5,7 @@ import 'package:proyecto/shared/widgets/custom_card.dart';
 import 'package:proyecto/shared/widgets/primary_button.dart';
 import 'package:proyecto/features/store/state/cart_controller.dart';
 import 'package:provider/provider.dart';
+import 'package:proyecto/features/store/disccount.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -14,6 +15,15 @@ class CartScreen extends StatelessWidget {
     final cart = Provider.of<CartController>(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+
+    bool descuento = DiscountState.descuentoActivo;
+    double valor = 0;
+    // Lógica del descuento
+    if (descuento) {
+      valor = cart.totalPrice * 0.10; // 10%
+    }
+
+    double totalConDescuento = cart.totalPrice - valor;
 
     return Scaffold(
       appBar: AppBar(
@@ -94,17 +104,32 @@ class CartScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
+
+                  // MOSTRAR TOTAL
                   Text(
-                    'Total: MXN ${cart.totalPrice.toStringAsFixed(2)}',
+                    descuento
+                        ? 'Total (10% de descuento aplicado): MXN ${totalConDescuento.toStringAsFixed(2)}'
+                        : 'Total: MXN ${cart.totalPrice.toStringAsFixed(2)}',
                     style: tt.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: cs.primary,
                     ),
                   ),
+
                   const SizedBox(height: 12),
+
+                  // BOTÓN PAGO
                   PrimaryButton(
                     text: "Proceder al pago",
                     onPressed: () {
+                      if (descuento) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Se aplicó un 10% de descuento 🐾'),
+                          ),
+                        );
+                      }
+
                       Navigator.pushNamed(context, AppRoutes.stripeCheckout);
                     },
                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto/shared/widgets/custom_card.dart';
 import 'package:proyecto/routes/app_routes.dart';
+import 'package:proyecto/features/store/disccount.dart';
 
 class StoreScreen extends StatelessWidget {
   const StoreScreen({super.key});
@@ -32,19 +33,24 @@ class StoreScreen extends StatelessWidget {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => Navigator.pushNamed(context, AppRoutes.storeDemo),
+                  onPressed: () 
+                  {
+                    DiscountState.descuentoActivo = false;
+                    Navigator.pushNamed(context, AppRoutes.storeDemo);
+                    
+                  },
                   child: Text('Ver catálogo', style: TextStyle(color: cs.primary)),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 12),
-          CustomCard(
-            child: Text(
-              'Productos populares (pendiente)',
-              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-            ),
-          ),
+        //  CustomCard(
+          //  child: Text(
+            //  'Productos populares (pendiente)',
+             // style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+            //),
+          //),
         ],
       ),
     );

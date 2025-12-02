@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto/shared/widgets/custom_card.dart';
 import 'package:proyecto/shared/widgets/primary_button.dart';
+import 'package:proyecto/routes/app_routes.dart';
+import 'package:proyecto/features/store/disccount.dart';
 
 class PromoBanner extends StatefulWidget {
   const PromoBanner({super.key});
@@ -30,7 +32,7 @@ class _PromoBannerState extends State<PromoBanner> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              "10% de descuento en tu próximo grooming este mes",
+              "10% de descuento en tu próxima compra",
               style: tt.bodyMedium?.copyWith(
                 color: cs.onSurface,
                 fontWeight: FontWeight.w600,
@@ -41,11 +43,12 @@ class _PromoBannerState extends State<PromoBanner> {
             width: 130,
             child: PrimaryButton(
               text: "Aprovechar",
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Aqui mandará a la oferta')),
-                );
-              },
+                  onPressed: () {
+                    DiscountState.activar();   // ⬅ activa el descuento
+                    Navigator.pushNamed(context, AppRoutes.storeDemo);
+                  },
+
+             
             ),
           ),
         ],
